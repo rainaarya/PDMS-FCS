@@ -63,7 +63,7 @@ def sign_up(request):
                 profile.location = None
                 profile.contact = None
             else:
-                if profile.organisation_name is None or profile.document1 is None or profile.document2 is None or profile.description is None or profile.image1 is None or profile.image2 is None or profile.location is None or profile.contact is None:
+                if profile.organisation_name is None or profile.description is None or profile.image1 is None or profile.image2 is None or profile.location is None or profile.contact is None:
                     # error, redirect to sign up page
                     return redirect("/sign-up")
             profile.save()
