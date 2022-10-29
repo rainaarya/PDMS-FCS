@@ -1,7 +1,7 @@
 {% extends 'main/base.html' %} {% block title %}Sign Up{% endblock %} 
 {% load crispy_forms_tags %} {% block content %}
-<form method="post">
-  {% csrf_token %}{{user_form|crispy}}{{profile_form|crispy}}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}{{user_form|crispy}}<p><b>On the basis of role, fill the required details or leave it blank.</b></p>{{profile_form|crispy}}
   <p>Have an account? Login <a href="/login">Here</a>!</p>
   <button type="submit" class="btn btn-success">Register</button>
 </form>

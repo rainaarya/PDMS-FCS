@@ -48,13 +48,24 @@ def create_post(request):
 def sign_up(request):
     if request.method == 'POST':
         user_form = RegisterForm(request.POST)
-        profile_form = ProfileForm(request.POST)
+        profile_form = ProfileForm(request.POST, request.FILES)
 
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
             profile = profile_form.save(commit=False)
             if profile.user_id is None:
                 profile.user_id = user.id
+            if profile.role == 'patient':
+                profile.organisation_name = None
+                profile.description = None
+                profile.image1 = None
+                profile.image2 = None
+                profile.location = None
+                profile.contact = None
+            else:
+                if profile.organisation_name is None or profile.document1 is None or profile.document2 is None or profile.description is None or profile.image1 is None or profile.image2 is None or profile.location is None or profile.contact is None:
+                    # error, redirect to sign up page
+                    return redirect("/sign-up")
             profile.save()
             login(request, user)
             return redirect("/home")

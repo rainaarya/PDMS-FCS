@@ -12,9 +12,12 @@ class RegisterForm(UserCreationForm):
         fields = ["username", "email", "password1", "password2"]
     
 class ProfileForm(forms.ModelForm):
+    document1=forms.FileField(required=True)
+    document2=forms.FileField(required=True)
+    
     class Meta:
         model = Profile
-        fields = ["role"]
+        fields = ["role", "document1", "document2", "organisation_name", "description", "image1", "image2", "location", "contact"]
 
 class PostForm(forms.ModelForm):
     class Meta:
