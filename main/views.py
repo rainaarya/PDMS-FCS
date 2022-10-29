@@ -5,14 +5,15 @@ from .forms import RegisterForm, PostForm, ProfileForm
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
-from .models import Post
+from .models import Post, Profile
+from django.http import HttpResponse
 
 
 @login_required(login_url="/login")
 def home(request):
     if request.user.is_authenticated:
         if request.user.profile.role == 'patient':
-            return render(request, 'main/patient.html')
+            return redirect("/patient")
         elif request.user.profile.role == 'healthcarepro':
             return render(request, 'main/healthcarepro.html')
         elif request.user.profile.role == 'hospital':
@@ -26,7 +27,36 @@ def home(request):
     else:
         return redirect("/login")
 
+@login_required(login_url="/login")
+def patient(request):
+    if request.user.is_authenticated:
+        if request.user.profile.role == 'patient':            
+            #Patients can view and search through a catalog of healthcare professionals and organizations.
+            if request.method == 'POST':
+                type=request.POST.get('type')
+                search=request.POST.get('search')
 
+                if type == 'healthcarepro':
+                    # search for healthcarepro and name as user first name and last name
+                    results = Profile.objects.filter(role='healthcarepro', user__first_name__icontains=search) | Profile.objects.filter(role='healthcarepro', user__last_name__icontains=search)
+                    return render(request, 'main/patient.html', {'results':results})
+                elif type == 'hospital':
+                    results = Profile.objects.filter(role='hospital', organisation_name__icontains=search)
+                    return render(request, 'main/patient.html', {'results': results})
+                elif type == 'pharmacy':
+                    results = Profile.objects.filter(role='pharmacy', organisation_name__icontains=search)
+                    return render(request, 'main/patient.html', {'results': results})
+                elif type == 'insurance':
+                    results = Profile.objects.filter(role='insurance', organisation_name__icontains=search)
+                    return render(request, 'main/patient.html', {'results': results})
+                else:
+                    return redirect("/patient")
+            else:
+                return render(request, 'main/patient.html')
+        else:
+            return redirect("/home")
+    else:
+        return redirect("/login")
 
 
 @login_required(login_url="/login")
@@ -65,7 +95,7 @@ def sign_up(request):
             else:
                 if profile.organisation_name is None or profile.description is None or profile.image1 is None or profile.image2 is None or profile.location is None or profile.contact is None:
                     # error, redirect to sign up page
-                    return redirect("/sign-up")
+                    return HttpResponse("Error! Please fill in all the required fields during Sign Up based on your role.")
             profile.save()
             login(request, user)
             return redirect("/home")

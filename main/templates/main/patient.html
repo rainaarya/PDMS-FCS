@@ -1,4 +1,65 @@
-{% extends 'main/base.html' %} {% block title %}Patient Page{% endblock %} 
+{% extends 'main/base.html' %} {% block title %}Patient Page{% endblock %}
 {% load crispy_forms_tags %} {% block content %}
 <h1 class="text-center">Patient Page</h1>
+<div class="container-fluid">
+<form method="POST">
+    {% csrf_token %}
+    <!-- make a form with dropdown for selecting the type and searchbar for searching the name -->
+    <div class="form-group">
+        <label for="search">Search</label>
+        <br>
+        <input type="text" class="form-control" id="search" name="search" placeholder="Search">
+    </div>
+
+    <div class="form-group">
+        <label for="type">Type</label>
+        <select class="form-control" id="type" name="type">
+            <option value="healthcarepro"> Healthcare Professional </option>
+            <option value="hospital"> Hospital </option>
+            <option value="pharmacy"> Pharmacy </option>
+            <option value="insurance"> Insurance </option>
+        </select>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <br> <br>
+</form>
+</div>
+
+
+<!-- Display the details of the searched person if found -->
+<div class="container-fluid">
+    {% if results %}
+    <table class="table table-striped">
+        <h3>Details Found!</h3>
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Location</th>
+                <th scope="col">Description</th>
+                <th scope="col">Contact</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                {% if result.role == 'healthcarepro' %}
+                <td>{{result.user.first_name}} {{result.user.last_name}}</td>
+                {% else %}
+                <td>{{result.organisation_name}}</td>
+                {% endif %}
+                <td>{{result.user.email}}</td>
+                <td>{{result.location}}</td>
+                <td>{{result.description}}</td>
+                <td>{{result.contact}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+
+</div>
+
 {% endblock %}
