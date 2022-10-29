@@ -55,7 +55,7 @@ def sign_up(request):
             profile = profile_form.save(commit=False)
             if profile.user_id is None:
                 profile.user_id = user.id
-            if profile.role == 'patient':
+            if profile.role == 'patient' or profile.role == 'healthcarepro':
                 profile.organisation_name = None
                 profile.description = None
                 profile.image1 = None
