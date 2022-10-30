@@ -1,12 +1,13 @@
 from turtle import right
 from django.shortcuts import render, redirect
 from matplotlib.pyplot import get
+from requests import post
 from .forms import RegisterForm, PostForm, ProfileForm
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
 from .models import Post, Profile
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse
 
 
 @login_required(login_url="/login")
@@ -15,13 +16,13 @@ def home(request):
         if request.user.profile.role == 'patient':
             return redirect("/patient")
         elif request.user.profile.role == 'healthcarepro':
-            return render(request, 'main/healthcarepro.html')
+            return redirect("/healthcarepro")
         elif request.user.profile.role == 'hospital':
-            return render(request, 'main/hospital.html')
+            return redirect("/hospital")
         elif request.user.profile.role == 'pharmacy':
-            return render(request, 'main/pharmacy.html')
+            return redirect("/pharmacy")
         elif request.user.profile.role == 'insurance':
-            return render(request, 'main/insurance.html')
+            return redirect("/insurance")
         else:
             return redirect("/home")
     else:
@@ -33,46 +34,253 @@ def patient(request):
         if request.user.profile.role == 'patient':            
             #Patients can view and search through a catalog of healthcare professionals and organizations.
             if request.method == 'POST':
-                type=request.POST.get('type')
-                search=request.POST.get('search')
-
-                if type == 'healthcarepro':
-                    # search for healthcarepro and name as user first name and last name
-                    results = Profile.objects.filter(role='healthcarepro', user__first_name__icontains=search) | Profile.objects.filter(role='healthcarepro', user__last_name__icontains=search)
-                    return render(request, 'main/patient.html', {'results':results})
-                elif type == 'hospital':
-                    results = Profile.objects.filter(role='hospital', organisation_name__icontains=search)
-                    return render(request, 'main/patient.html', {'results': results})
-                elif type == 'pharmacy':
-                    results = Profile.objects.filter(role='pharmacy', organisation_name__icontains=search)
-                    return render(request, 'main/patient.html', {'results': results})
-                elif type == 'insurance':
-                    results = Profile.objects.filter(role='insurance', organisation_name__icontains=search)
-                    return render(request, 'main/patient.html', {'results': results})
+                if request.POST.get('download-user'):
+                    try:
+                        post_id = request.POST.get('download-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.author_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+                elif request.POST.get('download-shared-user'):
+                    try:
+                        post_id = request.POST.get('download-shared-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.share_to_user_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+                elif request.POST.get('delete-user'):
+                    try:
+                        post_id = request.POST.get('delete-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.author == request.user:
+                        post.delete()
+                        return redirect("/patient")
+                    else:
+                        return HttpResponse("Error! You do not have permission to delete this document.")
+                #if post request contains receiver
+                elif request.POST.get('receiver'):
+                    receiver = request.POST.get('receiver')
+                    #print(int(receiver))
+                    return redirect("/share/"+receiver)
                 else:
-                    return redirect("/patient")
+                    type=request.POST.get('type')
+                    search=request.POST.get('search')
+
+                    if type == 'healthcarepro':
+                        # search for healthcarepro and name as user first name and last name
+                        results = Profile.objects.filter(role='healthcarepro', user__first_name__icontains=search) | Profile.objects.filter(role='healthcarepro', user__last_name__icontains=search)
+                        return render(request, 'main/patient.html', {'results':results})
+                    elif type == 'hospital':
+                        results = Profile.objects.filter(role='hospital', organisation_name__icontains=search)
+                        return render(request, 'main/patient.html', {'results': results})
+                    elif type == 'pharmacy':
+                        results = Profile.objects.filter(role='pharmacy', organisation_name__icontains=search)
+                        return render(request, 'main/patient.html', {'results': results})
+                    elif type == 'insurance':
+                        results = Profile.objects.filter(role='insurance', organisation_name__icontains=search)
+                        return render(request, 'main/patient.html', {'results': results})
+                    else:
+                        return redirect("/patient")
             else:
-                return render(request, 'main/patient.html')
+                user_posts=Post.objects.filter(author=request.user)
+                shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
+                return render(request, 'main/patient.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+
+        else:
+            return redirect("/home")
+    else:
+        return redirect("/login")
+
+@login_required(login_url="/login")
+def insurance(request):
+    if request.user.is_authenticated:
+        if request.user.profile.role == 'insurance':
+            if request.method == 'POST':
+                if request.POST.get('download-user'):
+                    try:
+                        post_id = request.POST.get('download-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.author_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+                elif request.POST.get('download-shared-user'):
+                    try:
+                        post_id = request.POST.get('download-shared-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.share_to_user_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+
+                # Code here to search for users and share documents with them
+            else:
+                user_posts=Post.objects.filter(author=request.user)
+                shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
+
+
+                return render(request, 'main/insurance.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+
+        else:
+            return redirect("/home")
+    else:
+        return redirect("/login")
+
+@login_required(login_url="/login")
+def healthcarepro(request):
+    if request.user.is_authenticated:
+        if request.user.profile.role == 'healthcarepro':
+            if request.method == 'POST':
+                if request.POST.get('download-user'):
+                    try:
+                        post_id = request.POST.get('download-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.author_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+                elif request.POST.get('download-shared-user'):
+                    try:
+                        post_id = request.POST.get('download-shared-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.share_to_user_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+
+                # Code here to search for users and share documents with them
+            else:
+                user_posts=Post.objects.filter(author=request.user)
+                shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
+
+
+                return render(request, 'main/healthcarepro.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+
+        else:
+            return redirect("/home")
+    else:
+        return redirect("/login")
+
+@login_required(login_url="/login")
+def pharmacy(request):
+    if request.user.is_authenticated:
+        if request.user.profile.role == 'pharmacy':
+            if request.method == 'POST':
+                if request.POST.get('download-user'):
+                    try:
+                        post_id = request.POST.get('download-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.author_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+                elif request.POST.get('download-shared-user'):
+                    try:
+                        post_id = request.POST.get('download-shared-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.share_to_user_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+
+                # Code here to search for users and share documents with them
+            else:
+                user_posts=Post.objects.filter(author=request.user)
+                shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
+
+
+                return render(request, 'main/pharmacy.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+
+        else:
+            return redirect("/home")
+    else:
+        return redirect("/login")
+
+@login_required(login_url="/login")
+def hospital(request):
+    if request.user.is_authenticated:
+        if request.user.profile.role == 'hospital':
+            if request.method == 'POST':
+                if request.POST.get('download-user'):
+                    try:
+                        post_id = request.POST.get('download-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.author_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+                elif request.POST.get('download-shared-user'):
+                    try:
+                        post_id = request.POST.get('download-shared-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.share_to_user_id == request.user.id:
+                        return FileResponse(post.file, as_attachment=True)
+                    else:
+                        return HttpResponse("Error! You do not have permission to download this document.")
+
+                # Code here to search for users and share documents with them
+            else:
+                user_posts=Post.objects.filter(author=request.user)
+                shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
+
+
+                return render(request, 'main/hospital.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+
         else:
             return redirect("/home")
     else:
         return redirect("/login")
 
 
-@login_required(login_url="/login")
-@permission_required("main.add_post", login_url="/login", raise_exception=True)
-def create_post(request):
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            return redirect("/home")
-    else:
-        form = PostForm()
 
-    return render(request, 'main/create_post.html', {"form": form})
+@login_required(login_url="/login")
+#@permission_required("main.add_post", login_url="/login", raise_exception=True)
+def share(request, receiver):
+    if request.user.is_authenticated:
+        try:
+            receiver_user = User.objects.get(id=receiver)
+        except:
+            return HttpResponse("Error! receiver does not exist.")
+        if request.user.profile.role == receiver_user.profile.role:
+            return HttpResponse("Error! You cannot share among the users of same role.")
+        if request.method == 'POST':
+            form = PostForm(request.POST, request.FILES)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.author = request.user
+                post.share_to_user = receiver_user
+                post.save()
+                return redirect("/home")
+        else:
+            form = PostForm()
+
+        return render(request, 'main/share.html', {"form": form})
+    else:
+        return redirect("/login")
 
 
 def sign_up(request):

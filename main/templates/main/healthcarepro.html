@@ -1,4 +1,44 @@
-{% extends 'main/base.html' %} {% block title %}Patient Page{% endblock %} 
+{% extends 'main/base.html' %} {% block title %}Healthcare Professional Page{% endblock %}
 {% load crispy_forms_tags %} {% block content %}
 <h1 class="text-center">Healthcare Professional Page</h1>
+<!-- Show user's own posts and posts shared by other users to the user -->
+{% if user_posts %}
+<br><br>
+<h3 class="text-left">Your Uploaded Files</h2>
+{% for post in user_posts %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{post.title}}</h5>
+        <!-- Show download button if the post has a file -->
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary" value="{{post.id}}" name="download-user">Download</button>
+        </form>
+        <p class="card-text">File Shared to: {{post.share_to_user.username}}</p>
+        <p class="card-text"><small class="text-muted">Posted by {{post.author.username}} on {{post.created_at}}</small>
+        </p>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if shared_with_user_posts %}
+<br><br>
+<h3 class="text-left">Files Shared by Others</h2>
+{% for post in shared_with_user_posts %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{post.title}}</h5>
+        <!-- Show download button if the post has a file -->
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary" value="{{post.id}}" name="download-shared-user">Download</button>
+        </form>
+        <p class="card-text"><small class="text-muted">Posted by {{post.author.username}} on {{post.created_at}}</small>
+        </p>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
 {% endblock %}

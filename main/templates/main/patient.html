@@ -1,29 +1,78 @@
 {% extends 'main/base.html' %} {% block title %}Patient Page{% endblock %}
 {% load crispy_forms_tags %} {% block content %}
 <h1 class="text-center">Patient Page</h1>
-<div class="container-fluid">
-<form method="POST">
-    {% csrf_token %}
-    <!-- make a form with dropdown for selecting the type and searchbar for searching the name -->
-    <div class="form-group">
-        <label for="search">Search</label>
-        <br>
-        <input type="text" class="form-control" id="search" name="search" placeholder="Search">
-    </div>
 
-    <div class="form-group">
-        <label for="type">Type</label>
-        <select class="form-control" id="type" name="type">
-            <option value="healthcarepro"> Healthcare Professional </option>
-            <option value="hospital"> Hospital </option>
-            <option value="pharmacy"> Pharmacy </option>
-            <option value="insurance"> Insurance </option>
-        </select>
+<!-- Show user's own posts and posts shared by other users to the user -->
+
+{% if user_posts %}
+<br><br>
+<h3 class="text-left">Your Uploaded Files</h2>
+{% for post in user_posts %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{post.title}}</h5>
+        <!-- Show download button if the post has a file -->
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary" value="{{post.id}}" name="download-user">Download</button>
+            <!-- To delete the post -->
+            {% if post.author == user %}
+            <button type="submit" class="btn btn-danger" value="{{post.id}}" name="delete-user">Delete</button>
+            {% endif %}
+        </form>
+        <p class="card-text">File Shared to: {{post.share_to_user.username}}</p>
+        <p class="card-text"><small class="text-muted">Posted by {{post.author.username}} on {{post.created_at}}</small>
+        </p>
     </div>
-    <br>
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <br> <br>
-</form>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if shared_with_user_posts %}
+<br><br>
+<h3 class="text-left">Files Shared by Others</h2>
+{% for post in shared_with_user_posts %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{post.title}}</h5>
+        <!-- Show download button if the post has a file -->
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary" value="{{post.id}}" name="download-shared-user">Download</button>
+        </form>
+        <p class="card-text"><small class="text-muted">Posted by {{post.author.username}} on {{post.created_at}}</small>
+        </p>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<br><br><br>
+
+<h3 class="text-left">Search Orgs & Share Files: </h3>
+<div class="container-fluid">
+    <form method="POST">
+        {% csrf_token %}
+        <!-- make a form with dropdown for selecting the type and searchbar for searching the name -->
+        <div class="form-group">
+            <label for="search">Enter Organization/Healthcare Professional Name</label>
+            <br>
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search">
+        </div>
+
+        <div class="form-group">
+            <label for="type">Type</label>
+            <select class="form-control" id="type" name="type">
+                <option value="healthcarepro"> Healthcare Professional </option>
+                <option value="hospital"> Hospital </option>
+                <option value="pharmacy"> Pharmacy </option>
+                <option value="insurance"> Insurance </option>
+            </select>
+        </div>
+        <br>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <br> <br>
+    </form>
 </div>
 
 
@@ -39,6 +88,7 @@
                 <th scope="col">Location</th>
                 <th scope="col">Description</th>
                 <th scope="col">Contact</th>
+                <th scope="col">Share Documents Button</th>
             </tr>
         </thead>
         <tbody>
@@ -53,6 +103,14 @@
                 <td>{{result.location}}</td>
                 <td>{{result.description}}</td>
                 <td>{{result.contact}}</td>
+                <!-- Send the searched person back as a hidden input -->
+                <td>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="receiver" value="{{result.user.id}}">
+                        <button type="submit" class="btn btn-primary">Share Documents</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

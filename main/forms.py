@@ -22,6 +22,7 @@ class ProfileForm(forms.ModelForm):
         fields = ["role", "document1", "document2", "organisation_name", "description", "image1", "image2", "location", "contact"]
 
 class PostForm(forms.ModelForm):
+    file = forms.FileField(required=True)
     class Meta:
         model = Post
-        fields = ["title", "description"]
+        fields = ["title", "file"]
