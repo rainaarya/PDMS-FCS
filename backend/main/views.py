@@ -339,6 +339,9 @@ def sign_up(request):
 
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
+            user.refresh_from_db()
+            user.is_active = False
+            user.save()
             profile = profile_form.save(commit=False)
             if profile.user_id is None:
                 profile.user_id = user.id
@@ -354,8 +357,10 @@ def sign_up(request):
                     # error, redirect to sign up page
                     return HttpResponse("Error! Please fill in all the required fields during Sign Up based on your role.")
             profile.save()
-            login(request, user)
-            return redirect("/home")
+            if (login(request, user)):
+                return redirect("/home")
+            else:
+                return HttpResponse("Thank you for signing up. Your account is pending review by the admin and will be activated soon.")
         else:
             print(user_form.errors)
 
