@@ -2,28 +2,42 @@ from tkinter import N
 from django.db import models
 from django.contrib.auth.models import User
 from yaml import DocumentStartEvent
+from django.core.exceptions import ValidationError
 
 
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    file = models.FileField(upload_to='userdocuments/', null=True, blank=True)
+    file = models.FileField(upload_to='user-documents/', null=True, blank=True)
+    certificate_user = models.FileField(upload_to='user-certificates/', null=True, blank=True)
     #user whom the author wants to share the file with
     share_to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='share_to_user')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def clean(self):
+        # method to check if the file is a pdf and not more than 5MB
+        if self.file:
+            if not self.file.name.endswith('.pdf'):
+                raise ValidationError('File is not PDF Format')
+            if self.file.size > 5242880:
+                raise ValidationError('File is too large (> 5 MB)')
+        else:
+            raise ValidationError('File is missing')
+
     def delete(self, using=None, keep_parents=False):
-    # to delete the physical file from the storage when the object is deleted
+        # to delete the physical file from the storage when the object is deleted
         storage = self.file.storage
 
         if storage.exists(self.file.name):
             storage.delete(self.file.name)
+        if storage.exists(self.certificate_user.name):
+            storage.delete(self.certificate_user.name)
 
         super().delete()
 
     def __str__(self):
-        return self.title + "\n" + self.description
+        return self.title + "\n" + self.author.username + "\n" + self.share_to_user.username
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

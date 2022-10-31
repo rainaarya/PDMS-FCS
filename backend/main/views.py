@@ -1,3 +1,5 @@
+import imp
+import re
 from turtle import right
 from django.shortcuts import render, redirect
 from matplotlib.pyplot import get
@@ -8,6 +10,9 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
 from .models import Post, Profile
 from django.http import FileResponse, HttpResponse
+from digital_signatures import signatures
+from django.core.files import File
+import os
 
 
 @login_required(login_url="/login")
@@ -129,9 +134,18 @@ def insurance(request):
             else:
                 user_posts=Post.objects.filter(author=request.user)
                 shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
+                shared_with_user_posts_list=[]
 
+                for post in shared_with_user_posts:
+                    #print all attributes of post as a dictionary
+                    post_data=vars(post)
+                    if signatures.verify_pdf(post.certificate_user.path, post.file.path):
+                        post_data['is_signed']=True
+                    else:
+                        post_data['is_signed']=False
+                    shared_with_user_posts_list.append(post_data)
 
-                return render(request, 'main/insurance.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+                return render(request, 'main/insurance.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
 
         else:
             return redirect("/home")
@@ -168,9 +182,18 @@ def healthcarepro(request):
             else:
                 user_posts=Post.objects.filter(author=request.user)
                 shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
+                shared_with_user_posts_list=[]
 
+                for post in shared_with_user_posts:
+                    #print all attributes of post as a dictionary
+                    post_data=vars(post)
+                    if signatures.verify_pdf(post.certificate_user.path, post.file.path):
+                        post_data['is_signed']=True
+                    else:
+                        post_data['is_signed']=False
+                    shared_with_user_posts_list.append(post_data)
 
-                return render(request, 'main/healthcarepro.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+                return render(request, 'main/healthcarepro.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
 
         else:
             return redirect("/home")
@@ -207,9 +230,18 @@ def pharmacy(request):
             else:
                 user_posts=Post.objects.filter(author=request.user)
                 shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
+                shared_with_user_posts_list=[]
 
+                for post in shared_with_user_posts:
+                    #print all attributes of post as a dictionary
+                    post_data=vars(post)
+                    if signatures.verify_pdf(post.certificate_user.path, post.file.path):
+                        post_data['is_signed']=True
+                    else:
+                        post_data['is_signed']=False
+                    shared_with_user_posts_list.append(post_data)
 
-                return render(request, 'main/pharmacy.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+                return render(request, 'main/pharmacy.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
 
         else:
             return redirect("/home")
@@ -246,9 +278,18 @@ def hospital(request):
             else:
                 user_posts=Post.objects.filter(author=request.user)
                 shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
+                shared_with_user_posts_list=[]
 
+                for post in shared_with_user_posts:
+                    #print all attributes of post as a dictionary
+                    post_data=vars(post)
+                    if signatures.verify_pdf(post.certificate_user.path, post.file.path):
+                        post_data['is_signed']=True
+                    else:
+                        post_data['is_signed']=False
+                    shared_with_user_posts_list.append(post_data)
 
-                return render(request, 'main/hospital.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+                return render(request, 'main/hospital.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
 
         else:
             return redirect("/home")
@@ -273,8 +314,16 @@ def share(request, receiver):
                 post = form.save(commit=False)
                 post.author = request.user
                 post.share_to_user = receiver_user
+                certificate_path, private_key_path = signatures.load(post.author.username)
+                post.certificate_user = File(open(certificate_path, 'rb'))
                 post.save()
+                signatures.sign_pdf(post.file.path, certificate_path, private_key_path)
+                # remove certificate of certificate_path
+                os.remove(certificate_path)
                 return redirect("/home")
+            else:
+                return HttpResponse("Error! Invalid form data. Make sure size of file is less than 5MB and file type is pdf.")
+                
         else:
             form = PostForm()
 
