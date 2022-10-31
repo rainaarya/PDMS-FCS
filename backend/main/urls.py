@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 urlpatterns = [
@@ -10,6 +10,7 @@ urlpatterns = [
     path('pharmacy', views.pharmacy, name='pharmacy'),
     path('hospital', views.hospital, name='hospital'),
     path('healthcarepro', views.healthcarepro, name='healthcarepro'),
+    path('api/stripe/', include('payments.urls')),
     path('share/<int:receiver>', views.share, name='share'),
 
 ]

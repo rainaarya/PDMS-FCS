@@ -87,7 +87,7 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'USER': 'root',
-        'PASSWORD': 'mysql',
+        'PASSWORD': '_Ashmct94',
     }
 }
 
@@ -130,6 +130,10 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
+
+SITE_URL = 'http://localhost:3000'
+
+STRIPE_SECRET_KEY = 'sk_test_51LxyWISE61hfEnRG0FRzBRt1tLFnDfIIzciVjAjUqJ9VXIG0zjj7SuJEpJPxVGOisGMSU3lHjsmQOyHahHkHEAIZ00NLlxxEZX'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

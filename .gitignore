@@ -1,5 +1,6 @@
-main/__pycache__
-main/migrations
-website/__pycache__
-documents/
-images/
+backend/main/__pycache__
+backend/main/migrations
+backend/website/__pycache__
+backend/documents/
+backend/images/
+frontend/node_modules
