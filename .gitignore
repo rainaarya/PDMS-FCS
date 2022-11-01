@@ -7,4 +7,3 @@ backend/digital_signatures/__pycache__
 backend/payments/__pycache__
 backend/user-certificates/
 backend/user-documents
-frontend/node_modules
