@@ -1,6 +1,9 @@
 import imp
 import re
 from turtle import right
+from datetime import datetime
+from website import settings
+import string
 from django.shortcuts import render, redirect
 from matplotlib.pyplot import get
 from requests import post
@@ -13,6 +16,13 @@ from django.http import FileResponse, HttpResponse
 from digital_signatures import signatures
 from django.core.files import File
 import os
+import pyotp
+import random
+from django.core.mail import send_mail
+import base64
+
+def make_secret_key(random_string):
+    return str(datetime.date(datetime.now())) + random_string
 
 
 @login_required(login_url="/login")
@@ -357,10 +367,25 @@ def sign_up(request):
                     # error, redirect to sign up page
                     return HttpResponse("Error! Please fill in all the required fields during Sign Up based on your role.")
             profile.save()
-            if (login(request, user)):
-                return redirect("/home")
-            else:
-                return HttpResponse("Thank you for signing up. Your account is pending review by the admin and will be activated soon.")
+            request.session['otp_user_id'] = user.id
+            email = user.email
+            secret_key = make_secret_key(''.join(random.choices(string.ascii_uppercase + string.digits, k=10))) + user.email
+            encoded_key = base64.b32encode(secret_key.encode())
+            one_time_password = pyotp.TOTP(encoded_key, interval=90)  
+            subject = 'Validating OTP'
+            message = '\nThe 6 digit OTP is: ' + str(
+                one_time_password .now()) + '\n\nThis is a system-generated response for your OTP. Please do not reply to this email.'
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [email]
+            send_mail(subject, message, email_from, recipient_list)
+            request.session['otp_key'] = secret_key
+            return redirect("/otp")
+
+            # if (login(request, user)):
+            #     return redirect("/home")
+            # else:
+            #     return HttpResponse("Thank you for signing up. Your account is pending review by the admin and will be activated soon.")
+            
         else:
             print(user_form.errors)
 
@@ -369,3 +394,34 @@ def sign_up(request):
         profile_form = ProfileForm()
 
     return render(request, 'registration/sign_up.html', {"user_form": user_form, "profile_form": profile_form})
+
+def otp(request):
+    if request.user.is_authenticated:
+        return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
+
+    if 'otp_user_id' not in request.session.keys():
+        return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
+
+    if request.method == "GET":
+        user = User.objects.get(id=request.session['otp_user_id'])
+        args = {"email": user.email}
+        return render(request, "registration/otp.html", args)
+    
+    elif request.method == "POST":
+        secret_key = request.session['otp_key']
+        encoded_key = base64.b32encode(secret_key.encode())
+        request.session.pop('otp_key')
+        one_time_password = pyotp.TOTP(encoded_key, interval=90)
+        user = User.objects.get(id=request.session['otp_user_id'])
+        request.session.pop('otp_user_id')
+        if one_time_password.verify(request.POST["otp"]):
+            #login(request, user)
+            return HttpResponse("<h1>Success</h1><p>OTP verified successfully. Admin will review your account and activate it soon. </p> <p> Click <a href='/home'>here</a> to go to home page.</p>")
+        else:
+            # delete the user and profile from the database
+            user_profile = Profile.objects.get(user_id=user.id)
+            user_profile.delete()
+            user.delete()
+            return HttpResponse(f"<h1>Error</h1><p> OTP was wrong or has been expired </p><p><a href='{'/sign-up'}'>Try again</a></p>")
+    else:
+        return HttpResponse("<h1>Error</h1><p>Bad Request</p>")

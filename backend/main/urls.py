@@ -12,5 +12,7 @@ urlpatterns = [
     path('healthcarepro', views.healthcarepro, name='healthcarepro'),
     path('api/stripe/', include('payments.urls')),
     path('share/<int:receiver>', views.share, name='share'),
+    path('otp', views.otp, name='otp'),
+
 
 ]

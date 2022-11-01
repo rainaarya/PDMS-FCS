@@ -1,6 +1,7 @@
 from tkinter import N
 from django.db import models
 from django.contrib.auth.models import User
+from requests import delete
 from yaml import DocumentStartEvent
 from django.core.exceptions import ValidationError
 
@@ -58,6 +59,30 @@ class Profile(models.Model):
     image2 = models.ImageField(upload_to='images/', null=True, blank=True)
     location = models.CharField(max_length=200, null=True, blank=True)
     contact = models.CharField(max_length=200, null=True, blank=True)
+    
+    def delete(self, using=None, keep_parents=False):
+        # to delete the physical file from the storage when the object is deleted
+        print("\n\ndeleting\n\n")
+        storage = self.document1.storage
 
+        #check if fields exist        
+        if self.document1:
+            if storage.exists(self.document1.name):
+                storage.delete(self.document1.name)
+        
+        if self.document2:
+            if storage.exists(self.document2.name):
+                storage.delete(self.document2.name)
+        
+        if self.image1:
+            if storage.exists(self.image1.name):
+                storage.delete(self.image1.name)
+        
+        if self.image2:
+            if storage.exists(self.image2.name):
+                storage.delete(self.image2.name)
+
+        super().delete()
+    
     def __str__(self):
         return self.role
