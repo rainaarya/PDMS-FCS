@@ -62,7 +62,7 @@ class Profile(models.Model):
     
     def delete(self, using=None, keep_parents=False):
         # to delete the physical file from the storage when the object is deleted
-        print("\n\ndeleting\n\n")
+        #print("\n\ndeleting\n\n")
         storage = self.document1.storage
 
         #check if fields exist        
