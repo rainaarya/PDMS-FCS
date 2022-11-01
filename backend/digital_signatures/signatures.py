@@ -1,13 +1,11 @@
 import OpenSSL
 import os
 import time
-import argparse
 from pyhanko.sign.general import load_cert_from_pemder
 from pyhanko_certvalidator import ValidationContext
 from pyhanko.pdf_utils.reader import PdfFileReader
 from pyhanko.sign.validation import validate_pdf_signature
 from PDFNetPython3.PDFNetPython import *
-from typing import Tuple
 from pyhanko.pdf_utils.incremental_writer import IncrementalPdfFileWriter
 from pyhanko.sign import signers, timestamps, fields
 from pyhanko.sign.fields import *

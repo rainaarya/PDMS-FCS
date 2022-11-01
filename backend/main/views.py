@@ -1,12 +1,7 @@
-import imp
-import re
-from turtle import right
 from datetime import datetime
 from website import settings
 import string
 from django.shortcuts import render, redirect
-from matplotlib.pyplot import get
-from requests import post
 from .forms import RegisterForm, PostForm, ProfileForm
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import login, logout, authenticate
