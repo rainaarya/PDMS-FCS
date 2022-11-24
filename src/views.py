@@ -14,9 +14,7 @@ def Product_payment(request):
         client = razorpay.Client(auth=("rzp_test_FSmJq64QVMJZoT" , "2JB2coseLqjG7yWsniKIHs4Y"))
 
         # create order
-        response_payment = client.order.create(dict(amount=amount,
-                                                    currency='INR')
-                                               )
+        response_payment = client.order.create(dict(amount=amount,currency='INR'))
 
         order_id = response_payment['id']
         order_status = response_payment['status']

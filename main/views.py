@@ -19,6 +19,8 @@ import base64
 def make_secret_key(random_string):
     return str(datetime.date(datetime.now())) + random_string
 
+def administrator(request):
+    return render(request, 'main/administrator.html')
 
 @login_required(login_url="/login")
 def home(request):
