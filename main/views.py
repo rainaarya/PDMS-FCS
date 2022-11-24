@@ -366,7 +366,7 @@ def sign_up(request):
             email = user.email
             secret_key = make_secret_key(''.join(random.choices(string.ascii_uppercase + string.digits, k=10))) + user.email
             encoded_key = base64.b32encode(secret_key.encode())
-            one_time_password = pyotp.TOTP(encoded_key, interval=90)  
+            one_time_password = pyotp.TOTP(encoded_key, interval=300)  
             subject = 'Validating OTP'
             message = '\nThe 6 digit OTP is: ' + str(
                 one_time_password .now()) + '\n\nThis is a system-generated response for your OTP. Please do not reply to this email.'
@@ -406,7 +406,7 @@ def otp(request):
         secret_key = request.session['otp_key']
         encoded_key = base64.b32encode(secret_key.encode())
         request.session.pop('otp_key')
-        one_time_password = pyotp.TOTP(encoded_key, interval=90)
+        one_time_password = pyotp.TOTP(encoded_key, interval=300)
         user = User.objects.get(id=request.session['otp_user_id'])
         request.session.pop('otp_user_id')
         if one_time_password.verify(request.POST["otp"]):

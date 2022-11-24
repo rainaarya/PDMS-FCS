@@ -8,3 +8,5 @@ digital_signatures/__pycache__
 payments/__pycache__
 user-certificates/
 user-documents
+venv/
+static/
