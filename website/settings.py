@@ -156,3 +156,11 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'fcs.group23@gmail.com'
 EMAIL_HOST_PASSWORD = 'fheqdrjgeonxjyic'
+
+product_price_dict = dict()
+product_name_dict = dict()
+
+product_price_dict["1"] = 100
+product_name_dict["1"] = "Paracetamol"
+product_price_dict["2"] = 12
+product_name_dict["2"] = "Citrezine"
