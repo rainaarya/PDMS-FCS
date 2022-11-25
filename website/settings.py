@@ -28,9 +28,14 @@ SECRET_KEY = 'django-insecure-9npc35e5)-3nog*zd4l((=f%hrd2sjgzv#x5=3tr=k-(^_tm*+
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '192.168.3.41'
+    '192.168.3.41',
+    '127.0.0.1'
 ]
 
+AUTHENTICATION_BACKENDS = [
+    #'django.contrib.auth.backends.ModelBackend', # This is the default that allows us to log in via username
+    'website.authentication.SettingsBackend'
+]
 
 # Application definition
 
@@ -92,7 +97,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '',
         'USER': 'root',
-        'PASSWORD': '_Ashmct94',
+        'PASSWORD': 'mysql',
     }
 }
 
