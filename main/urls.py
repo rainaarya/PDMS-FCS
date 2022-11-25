@@ -11,7 +11,7 @@ urlpatterns = [
     path('hospital', views.hospital, name='hospital'),
     path('healthcarepro', views.healthcarepro, name='healthcarepro'),
     path('share/<int:receiver>', views.share, name='share'),
-    path('otp', views.otp, name='otp'),
+    path('otp', views.otp, name='otp'),    
+    path('profile', views.profile_page, name='profile'),
     path('administrator', views.administrator, name='administrator'),
-
 ]

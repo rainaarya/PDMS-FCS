@@ -1,0 +1,81 @@
+{% extends 'main/base.html' %} {% block title %}Profile Page{% endblock %}
+{% load crispy_forms_tags %} {% block content %}
+
+<h1 class="text-center">Profile Page</h1>
+<br>
+<!-- Show user his details and allow him to edit his details. Keep an edit button next to each field. When the user clicks on the edit button, the field should become editable. -->
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Your Details</h5>
+            {% if user_details %}
+            {% if editable %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name"
+                        value="{{user_details.first_name}}">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name"
+                        value="{{user_details.last_name}}">
+                </div>
+                <br>
+                {% if user_details.profile.role != 'patient' and user_details.profile.role != 'healthcarepro' %}
+                <div class="form-group">
+                    <label for="contact">Contact</label>
+                    <input type="text" class="form-control" id="contact" name="contact"
+                        value="{{user_details.profile.contact}}">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3">{{user_details.profile.description}}</textarea>
+                </div>
+                {% endif %}
+                <br>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+            {% else %}
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" class="form-control" id="first_name" name="first_name"
+                    value="{{user_details.first_name}}" readonly>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" class="form-control" id="last_name" name="last_name"
+                    value="{{user_details.last_name}}" readonly>
+            </div>
+            <br>
+            {% if user_details.profile.role != 'patient' and user_details.profile.role != 'healthcarepro' %}
+            <div class="form-group">
+                <label for="contact">Contact</label>
+                <input type="text" class="form-control" id="contact" name="contact"
+                    value="{{user_details.profile.contact}}" readonly>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3"
+                    readonly>{{user_details.profile.description}}</textarea>
+            </div>
+            {% endif %}
+            <br>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="editable" value="True">
+                <button type="submit" class="btn btn-primary">Edit</button>
+            </form>
+            {% endif %}
+            {% endif %}
+
+    </div>
+</div>
+
+
+
+{% endblock %}

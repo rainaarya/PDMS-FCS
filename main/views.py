@@ -426,3 +426,31 @@ def otp(request):
             return HttpResponse(f"<h1>Error</h1><p> UR TRASH OTP was wrong or has been expired </p><p><a href='{'/sign-up'}'>Try again</a></p>")
     else:
         return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
+
+@login_required(login_url="/login")
+def profile_page(request):
+    if request.user.is_authenticated:
+        editable = False
+        try:
+            user = User.objects.get(id=request.user.id)
+            if request.method == 'POST':
+                #print(request.POST)
+                if request.POST.get('editable')=='True':
+                    editable = True
+                    return render(request, 'main/profile.html', {"user_details": user, "editable": editable})  
+                else:
+                    editable = False
+                    user.first_name = request.POST.get('first_name')
+                    user.last_name = request.POST.get('last_name')
+                    if request.user.profile.role != 'patient' and request.user.profile.role != 'healthcarepro':
+                        profile = Profile.objects.get(user_id=request.user.id)
+                        profile.contact = request.POST.get('contact')
+                        profile.description = request.POST.get('description')
+                        profile.save()
+                    user.save()
+                    return render(request, 'main/profile.html', {"user_details": user, "editable": editable})     
+        except:
+            return HttpResponse("Error! User does not exist.")
+        
+        return render(request, 'main/profile.html', {"user_details": user, "editable": editable})
+        
