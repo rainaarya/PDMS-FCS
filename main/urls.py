@@ -11,13 +11,7 @@ urlpatterns = [
     path('hospital', views.hospital, name='hospital'),
     path('healthcarepro', views.healthcarepro, name='healthcarepro'),
     path('share/<int:receiver>', views.share, name='share'),
-    path('otp', views.otp, name='otp'),
-<<<<<<< HEAD
-    
+    path('otp', views.otp, name='otp'),    
     path('profile', views.profile_page, name='profile'),
-
-=======
     path('administrator', views.administrator, name='administrator'),
->>>>>>> 3db6a7816933aa8456d0f030a4f9c315f8a39beb
-
 ]
