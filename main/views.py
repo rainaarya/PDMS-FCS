@@ -518,14 +518,11 @@ def otp(request):
     
     elif request.method == "POST":
         secret_key = request.session['otp_key']
-        print(secret_key)
         encoded_key = base64.b32encode(secret_key.encode())
         request.session.pop('otp_key')
         one_time_password = pyotp.TOTP(encoded_key, interval=300)
         user = User.objects.get(id=request.session['otp_user_id'])
         request.session.pop('otp_user_id')
-        print(one_time_password.now())
-        print(request.POST["otp"])
         if one_time_password.verify(request.POST["otp"]):
             #login(request, user)
             return HttpResponse("<h1>Success</h1><p>OTP verified successfully. Admin will review your account and activate it soon. </p> <p> Click <a href='\home'>here</a> to go to home page.</p>")

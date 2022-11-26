@@ -113,9 +113,9 @@ def otp_payment(request):
             return render(request, 'abc/Product_payment.html', {'payment': response_payment})
         else:
             # delete the user and profile from the database
-            user_profile = Profile.objects.get(user_id=user.id)
-            user_profile.delete()
-            user.delete()
+            # user_profile = Profile.objects.get(user_id=user.id)
+            # user_profile.delete()
+            # user.delete()
             return HttpResponse(f"<h1>Error</h1><p> OTP was wrong or has been expired </p><p><a href='{'/sign-up'}'>Try again</a></p>")
     else:
         return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
