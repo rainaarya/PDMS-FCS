@@ -19,36 +19,31 @@
 
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td>Mark</td>
-        <td>Mark@gmail.com</td>
-        <td>name1.pdf</td>
-        <td>name2.pdf</td>
-        <td>Hospital</td>
-        <td>XYZ</td>
-        
-        <td>image1.jpg</td>
-        <td>image2.jpg</td>
-        <td>Delhi</td>
-        <td>1234567890</td>
-        <td>True</td>
-      </tr>
-      <tr>
-
-        <td>Jacob</td>
-        <td>Jacob@gmail.com</td>
-        <td>name1.pdf</td>
-        <td>name2.pdf</td>
-        <td>Insurance</td>
-        <td>XYZ</td>
-        <td>image1.jpg</td>
-        <td>image2.jpg</td>
-        <td>Delhi</td>
-        <td>1234567890</td>
-        <td>False</td>
-      </tr>
-    </tbody>
+    <form method="post">
+        {% csrf_token %}
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{user.username}}</td>
+                <td>{{user.email}}</td>
+                <td><button type="button" class="btn btn-primary" name="document1" value="{{user.id}}">Document1</button></td>
+                <td><button type="button" class="btn btn-primary" name="document2" value="{{user.id}}">Document2</button></td>
+                <td>{{user.profile.role}}</td>
+                <td>{{user.profile.organisation_name}}</td>
+                <td>{{user.profile.description}}</td>
+                <td><img src="{{user.profile.image1}}" alt="Image1" width="100" height="100"></td>
+                <td><img src="{{user.profile.image2}}" alt="Image2" width="100" height="100"></td>
+                <td>{{user.profile.location}}</td>
+                <td>{{user.profile.contact}}</td>
+                {% if user.is_active %}
+                <td><button type="submit" class="btn btn-danger" name="reject" value="{{user.id}}">Reject</button></td>
+                {% else %}
+                <td><button type="submit" class="btn btn-primary" name="approve" value="{{user.id}}">Approve</button></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </form>
   </table>
 
 {% endblock %}

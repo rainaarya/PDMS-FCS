@@ -23,7 +23,40 @@ def make_secret_key(random_string):
 def administrator(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
-            return render(request, 'main/administrator.html')
+            if request.method == "POST":
+                
+                if request.POST.get("document1"):
+                    try:
+                        document1=User.objects.get(id=request.POST.get("document1"))
+                        return FileResponse(document1.profile.document1, as_attachment=True)
+                    except:
+                        return HttpResponse("Error!")
+                
+                if request.POST.get("document2"):
+                    try:
+                        document2=User.objects.get(id=request.POST.get("document2"))
+                        return FileResponse(document2.profile.document2, as_attachment=True)
+                    except:
+                        return HttpResponse("Error!")
+                        
+                if request.POST.get("approve"):
+                    user_id = request.POST.get("approve")
+                    user = User.objects.get(id=user_id)
+                    user.is_active = True
+                    user.save()
+                    return redirect("/administrator")
+                elif request.POST.get("reject"):
+                    user_id = request.POST.get("reject")
+                    user = User.objects.get(id=user_id)
+                    # user_profile = Profile.objects.get(user_id=user.id)
+                    # user_profile.delete()
+                    # user.delete()
+                    user.is_active = False
+                    user.save()
+                    return redirect("/administrator")
+            else:
+                users = User.objects.all()
+                return render(request, "main/administrator.html", {"users": users})
         else:
             return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
     return render(request, 'main/administrator.html')
@@ -276,6 +309,11 @@ def healthcarepro(request):
                         post_data['is_signed']=False
                     # add author_username to post_data
                     post_data['author_username']=post.author.username
+                    blockchain_hash=blockchain_implementor.make_hash(post.file.path)
+                    if blockchain_implementor.verify_hash(blockchain_hash, post.blockchain_index):
+                        post_data['blockchain_verified']=True
+                    else:
+                        post_data['blockchain_verified']=False
                     post_data['role']=post.author.profile.role
                     shared_with_user_posts_list.append(post_data)
 
@@ -342,6 +380,11 @@ def pharmacy(request):
                         post_data['is_signed']=False
                     # add author_username to post_data
                     post_data['author_username']=post.author.username
+                    blockchain_hash=blockchain_implementor.make_hash(post.file.path)
+                    if blockchain_implementor.verify_hash(blockchain_hash, post.blockchain_index):
+                        post_data['blockchain_verified']=True
+                    else:
+                        post_data['blockchain_verified']=False
                     post_data['role']=post.author.profile.role
                     shared_with_user_posts_list.append(post_data)
 
@@ -407,6 +450,11 @@ def hospital(request):
                     else:
                         post_data['is_signed']=False
                     post_data['author_username']=post.author.username
+                    blockchain_hash=blockchain_implementor.make_hash(post.file.path)
+                    if blockchain_implementor.verify_hash(blockchain_hash, post.blockchain_index):
+                        post_data['blockchain_verified']=True
+                    else:
+                        post_data['blockchain_verified']=False
                     post_data['role']=post.author.profile.role
                     shared_with_user_posts_list.append(post_data)
 
