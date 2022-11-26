@@ -38,6 +38,21 @@ def administrator(request):
                         return FileResponse(document2.profile.document2, as_attachment=True)
                     except:
                         return HttpResponse("Error!")
+                
+                if request.POST.get("image1"):
+                    try:
+                        image1=User.objects.get(id=request.POST.get("image1"))
+                        return FileResponse(image1.profile.image1, as_attachment=True)
+                    except:
+                        return HttpResponse("Error!")
+                
+                if request.POST.get("image2"):
+                    try:
+                        print(type(request.POST.get("image2")))
+                        image2=User.objects.get(id=request.POST.get("image2"))
+                        return FileResponse(image2.profile.image2, as_attachment=True)
+                    except:
+                        return HttpResponse("Error!")
                         
                 if request.POST.get("approve"):
                     user_id = request.POST.get("approve")
@@ -55,7 +70,8 @@ def administrator(request):
                     user.save()
                     return redirect("/administrator")
             else:
-                users = User.objects.all()
+                # users who are not admin
+                users = User.objects.all().exclude(is_superuser=True)
                 return render(request, "main/administrator.html", {"users": users})
         else:
             return HttpResponse("<h1>Error</h1><p>Bad Request</p>")

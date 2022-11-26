@@ -1,49 +1,95 @@
 {% extends 'main/base.html' %} {% block title %}Administrator's Page{% endblock %}
 {% load crispy_forms_tags %} {% block content %}
 <h1 class="text-center">Administrator's Page</h1>
+<br>
+<h3>List of Organizations</h3>
+{% for user in users %}
+{% if user.profile.role != 'patient' and user.profile.role != 'healthcarepro' %}
 <table class="table">
-    <thead>
-      <tr>
-        <th scope="col">Username</th>
-        <th scope="col">Email</th>
-        <th scope="col">Document1</th>
-        <th scope="col">Document2</th>
-        <th scope="col">Role</th>
-        <th scope="col">Organisation Name</th>
-        <th scope="col">Description</th>
-        <th scope="col">Image1</th>
-        <th scope="col">Image2</th>
-        <th scope="col">Location</th>
-        <th scope="col">Contact</th>
-        <th scope="col">IsActive</th>
+  <thead>
+    <tr>
+      <th scope="col">Username</th>
+      <th scope="col">Email</th>
+      <th scope="col">Document1</th>
+      <th scope="col">Document2</th>
+      <th scope="col">Role</th>
+      <th scope="col">Organisation Name</th>
+      <th scope="col">Description</th>
+      <th scope="col">Image 1</th>
+      <th scope="col">Image 2</th>
+      <th scope="col">Location</th>
+      <th scope="col">Contact</th>
+      <th scope="col">Approval</th>
 
+    </tr>
+  </thead>
+  <form method="post">
+    {% csrf_token %}
+    <tbody>
+
+      <tr>
+        <td>{{user.username}}</td>
+        <td>{{user.email}}</td>
+        <td><button type="submit" class="btn btn-primary" name="document1" value="{{user.id}}">Doc 1</button></td>
+        <td><button type="submit" class="btn btn-primary" name="document2" value="{{user.id}}">Doc 2</button></td>
+        <td>{{user.profile.role}}</td>
+        <td>{{user.profile.organisation_name}}</td>
+        <td>{{user.profile.description}}</td>
+        <td><button type="submit" class="btn btn-info" name="image1" value="{{user.id}} width=" 100">Image1</button>
+        </td>
+        <td><button type="submit" class="btn btn-info" name="image2" value="{{user.id}} width=" 100">Image2</button>
+        </td>
+        <td>{{user.profile.location}}</td>
+        <td>{{user.profile.contact}}</td>
+        {% if user.is_active %}
+        <td><button type="submit" class="btn btn-danger" name="reject" value="{{user.id}}">Reject</button></td>
+        {% else %}
+        <td><button type="submit" class="btn btn-success" name="approve" value="{{user.id}}">Approve</button></td>
+        {% endif %}
       </tr>
-    </thead>
-    <form method="post">
-        {% csrf_token %}
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{user.username}}</td>
-                <td>{{user.email}}</td>
-                <td><button type="button" class="btn btn-primary" name="document1" value="{{user.id}}">Document1</button></td>
-                <td><button type="button" class="btn btn-primary" name="document2" value="{{user.id}}">Document2</button></td>
-                <td>{{user.profile.role}}</td>
-                <td>{{user.profile.organisation_name}}</td>
-                <td>{{user.profile.description}}</td>
-                <td><img src="{{user.profile.image1}}" alt="Image1" width="100" height="100"></td>
-                <td><img src="{{user.profile.image2}}" alt="Image2" width="100" height="100"></td>
-                <td>{{user.profile.location}}</td>
-                <td>{{user.profile.contact}}</td>
-                {% if user.is_active %}
-                <td><button type="submit" class="btn btn-danger" name="reject" value="{{user.id}}">Reject</button></td>
-                {% else %}
-                <td><button type="submit" class="btn btn-primary" name="approve" value="{{user.id}}">Approve</button></td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </form>
-  </table>
+
+    </tbody>
+  </form>
+</table>
+{% endif %}
+{% endfor %}
+
+<br><br>
+<h3>List of Individual Users</h3>
+{% for user in users %}
+{% if user.profile.role == 'patient' or user.profile.role == 'healthcarepro' %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Username</th>
+      <th scope="col">Email</th>
+      <th scope="col">Document1</th>
+      <th scope="col">Document2</th>
+      <th scope="col">Role</th>
+      <th scope="col">Approval</th>
+    </tr>
+  </thead>
+  <form method="post">
+    {% csrf_token %}
+    <tbody>
+
+      <tr>
+        <td>{{user.username}}</td>
+        <td>{{user.email}}</td>
+        <td><button type="submit" class="btn btn-primary" name="document1" value="{{user.id}}">Doc 1</button></td>
+        <td><button type="submit" class="btn btn-primary" name="document2" value="{{user.id}}">Doc 2</button></td>
+        <td>{{user.profile.role}}</td>
+        {% if user.is_active %}
+        <td><button type="submit" class="btn btn-danger" name="reject" value="{{user.id}}">Reject</button></td>
+        {% else %}
+        <td><button type="submit" class="btn btn-success" name="approve" value="{{user.id}}">Approve</button></td>
+        {% endif %}
+      </tr>
+
+    </tbody>
+  </form>
+</table>
+{% endif %}
+{% endfor %}
 
 {% endblock %}
