@@ -52,7 +52,7 @@ def patient(request):
                         post = Post.objects.get(id=int(post_id))
                     except:
                         return HttpResponse("Error! Document does not exist.")
-                    if post.author_id == request.user.id:
+                    if post.author_id == request.user.id:    
                         return FileResponse(post.file, as_attachment=True)
                     else:
                         return HttpResponse("Error! You do not have permission to download this document.")
@@ -77,6 +77,16 @@ def patient(request):
                         return redirect("/patient")
                     else:
                         return HttpResponse("Error! You do not have permission to delete this document.")
+                # if request post get hasrefund then
+                elif request.POST.get('store'):
+                    try:
+                        post_id = request.POST.get('store')
+                        post = Post.objects.get(id=int(post_id))
+                    except: 
+                        return HttpResponse(" Error! Store access does not exist.")
+                    if post.author == request.user:
+                        return redirect("/refund")
+                
                 #if post request contains receiver
                 elif request.POST.get('receiver'):
                     receiver = request.POST.get('receiver')
@@ -115,6 +125,7 @@ def patient(request):
                         post_data['is_signed']=False
                     # add author_username to post_data
                     post_data['author_username']=post.author.username
+                    post_data['role']=post.author.profile.role
                     shared_with_user_posts_list.append(post_data)
                 return render(request, 'main/patient.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
 
@@ -179,6 +190,7 @@ def insurance(request):
                         post_data['is_signed']=False
                     # add author_username to post_data
                     post_data['author_username']=post.author.username
+                    post_data['role']=post.author.profile.role
                     shared_with_user_posts_list.append(post_data)
                 
                 #print(shared_with_user_posts_list)
@@ -246,6 +258,7 @@ def healthcarepro(request):
                         post_data['is_signed']=False
                     # add author_username to post_data
                     post_data['author_username']=post.author.username
+                    post_data['role']=post.author.profile.role
                     shared_with_user_posts_list.append(post_data)
 
                 return render(request, 'main/healthcarepro.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
@@ -311,6 +324,7 @@ def pharmacy(request):
                         post_data['is_signed']=False
                     # add author_username to post_data
                     post_data['author_username']=post.author.username
+                    post_data['role']=post.author.profile.role
                     shared_with_user_posts_list.append(post_data)
 
                 return render(request, 'main/pharmacy.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
@@ -375,6 +389,7 @@ def hospital(request):
                     else:
                         post_data['is_signed']=False
                     post_data['author_username']=post.author.username
+                    post_data['role']=post.author.profile.role
                     shared_with_user_posts_list.append(post_data)
 
                 return render(request, 'main/hospital.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})

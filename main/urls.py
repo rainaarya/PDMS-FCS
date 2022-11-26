@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from src.views import Product_payment, payment_status, refund, otp_payment
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -14,4 +15,6 @@ urlpatterns = [
     path('otp', views.otp, name='otp'),    
     path('profile', views.profile_page, name='profile'),
     path('administrator', views.administrator, name='administrator'),
+    path('store', Product_payment, name='store'),
+    
 ]
