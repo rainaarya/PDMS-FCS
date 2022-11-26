@@ -74,7 +74,9 @@ def administrator(request):
                 users = User.objects.all().exclude(is_superuser=True)
                 return render(request, "main/administrator.html", {"users": users})
         else:
-            return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
+            return redirect("/home")
+    else:
+        return redirect("/login")
     return render(request, 'main/administrator.html')
 
 @login_required(login_url="/login")
