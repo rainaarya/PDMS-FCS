@@ -31,7 +31,7 @@ def Product_payment(request):
     if request.method == "POST":
         price = settings.product_price_dict[request.POST.get('id_of_product')]
         quantity = int(request.POST.get('quantity'))
-        name = settings.product_price_dict[request.POST.get('id_of_product')]
+        name = settings.product_name_dict[request.POST.get('id_of_product')]
         amount = price*quantity*100
 
         # create Razorpay client
@@ -196,6 +196,9 @@ def refund(request):
             path = 'abc/refund.html' 
             # find all products of user
             products = Product.objects.filter(username=User.objects.get(id=request.user.id).username, paid = True)
+            #create a list containing names of all products
+          
+                
 
             
             return render(request, path, {'products': products})

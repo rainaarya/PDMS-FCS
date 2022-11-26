@@ -98,7 +98,7 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '',
         'USER': 'root',
-        'PASSWORD': 'mysql',
+        'PASSWORD': '_Ashmct94',
     }
 }
 
@@ -173,4 +173,12 @@ product_price_dict["1"] = 100
 product_name_dict["1"] = "Paracetamol"
 product_price_dict["2"] = 12
 product_name_dict["2"] = "Citrezine"
+product_price_dict["3"] = 379
+product_name_dict["3"] = "Painkiller"
+product_price_dict["4"] = 82
+product_name_dict["4"] = "Cough Syrup"
+product_price_dict["5"] = 137
+product_name_dict["5"] = "Digene"
+product_price_dict["6"] = 45
+product_name_dict["6"] = "Azithromycin"
 
