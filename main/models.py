@@ -12,6 +12,7 @@ class Post(models.Model):
     share_to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='share_to_user')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    blockchain_index = models.IntegerField(default=0)
 
     def clean(self):
         # method to check if the file is a pdf and not more than 5MB

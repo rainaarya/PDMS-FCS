@@ -36,8 +36,8 @@ def verify_hash(hash, index):
 
     
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
    
-    hash,index=add_to_chain("input.pdf")
-    print(index)
-    print(verify_hash(hash,index))
+#     hash,index=add_to_chain("input.pdf")
+#     print(index)
+#     print(verify_hash(hash,index))

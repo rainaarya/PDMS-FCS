@@ -8,7 +8,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
 from .models import Post, Profile
 from django.http import FileResponse, HttpResponse
-from digital_signatures import signatures
+from digital_signatures import blockchain_implementor, signatures
 from django.core.files import File
 import os
 import pyotp
@@ -115,6 +115,12 @@ def patient(request):
                         post_data['is_signed']=False
                     # add author_username to post_data
                     post_data['author_username']=post.author.username
+                    # verify if it matches with blockchain
+                    blockchain_hash=blockchain_implementor.make_hash(post.file.path)
+                    if blockchain_implementor.verify_hash(blockchain_hash, post.blockchain_index):
+                        post_data['blockchain_verified']=True
+                    else:
+                        post_data['blockchain_verified']=False
                     shared_with_user_posts_list.append(post_data)
                 return render(request, 'main/patient.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
 
@@ -179,6 +185,13 @@ def insurance(request):
                         post_data['is_signed']=False
                     # add author_username to post_data
                     post_data['author_username']=post.author.username
+                    # verify if it matches with blockchain
+                    blockchain_hash=blockchain_implementor.make_hash(post.file.path)
+                    if blockchain_implementor.verify_hash(blockchain_hash, post.blockchain_index):
+                        post_data['blockchain_verified']=True
+                    else:
+                        post_data['blockchain_verified']=False
+                    print(post_data['blockchain_verified'])
                     shared_with_user_posts_list.append(post_data)
                 
                 #print(shared_with_user_posts_list)
@@ -408,6 +421,9 @@ def share(request, receiver):
                 signatures.sign_pdf(post.file.path, certificate_path, private_key_path)
                 # remove certificate of certificate_path
                 os.remove(certificate_path)
+                hash, blockchain_index = blockchain_implementor.add_to_chain(post.file.path)
+                post.blockchain_index = blockchain_index
+                post.save()
                 return redirect("/home")
             else:
                 return HttpResponse("Error! Invalid form data. Make sure size of file is less than 5MB and file type is pdf.")
