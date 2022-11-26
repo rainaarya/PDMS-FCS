@@ -28,7 +28,8 @@ SECRET_KEY = 'django-insecure-9npc35e5)-3nog*zd4l((=f%hrd2sjgzv#x5=3tr=k-(^_tm*+
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '192.168.3.41'
+    '192.168.3.41',
+    '127.0.0.1'
 ]
 
 
@@ -89,7 +90,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'patientdb',
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': '',
         'USER': 'root',
         'PASSWORD': '_Ashmct94',
@@ -161,8 +162,10 @@ EMAIL_HOST_PASSWORD = 'fheqdrjgeonxjyic'
 
 product_price_dict = dict()
 product_name_dict = dict()
+user_product_dict = dict()
 
 product_price_dict["1"] = 100
 product_name_dict["1"] = "Paracetamol"
 product_price_dict["2"] = 12
 product_name_dict["2"] = "Citrezine"
+
