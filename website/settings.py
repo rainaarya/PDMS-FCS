@@ -94,7 +94,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'patientdb',
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': '',
         'USER': 'root',
         'PASSWORD': 'mysql',
@@ -166,8 +166,10 @@ EMAIL_HOST_PASSWORD = 'fheqdrjgeonxjyic'
 
 product_price_dict = dict()
 product_name_dict = dict()
+user_product_dict = dict()
 
 product_price_dict["1"] = 100
 product_name_dict["1"] = "Paracetamol"
 product_price_dict["2"] = 12
 product_name_dict["2"] = "Citrezine"
+
