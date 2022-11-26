@@ -19,12 +19,20 @@ import base64
 def make_secret_key(random_string):
     return str(datetime.date(datetime.now())) + random_string
 
+@login_required(login_url="/login")
 def administrator(request):
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return render(request, 'main/administrator.html')
+        else:
+            return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
     return render(request, 'main/administrator.html')
 
 @login_required(login_url="/login")
 def home(request):
     if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect("/administrator")
         if request.user.profile.role == 'patient':
             return redirect("/patient")
         elif request.user.profile.role == 'healthcarepro':
@@ -35,8 +43,6 @@ def home(request):
             return redirect("/pharmacy")
         elif request.user.profile.role == 'insurance':
             return redirect("/insurance")
-        else:
-            return redirect("/home")
     else:
         return redirect("/login")
 
