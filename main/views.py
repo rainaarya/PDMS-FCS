@@ -367,6 +367,7 @@ def sign_up(request):
             request.session['otp_user_id'] = user.id
             email = user.email
             secret_key = make_secret_key(''.join(random.choices(string.ascii_uppercase + string.digits, k=10))) + user.email
+            print(secret_key)
             encoded_key = base64.b32encode(secret_key.encode())
             one_time_password = pyotp.TOTP(encoded_key, interval=300)  
             subject = 'Validating OTP'
@@ -394,7 +395,7 @@ def sign_up(request):
 
 def otp(request):
     if request.user.is_authenticated:
-        return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
+        return HttpResponse("<h1>Error</h1><p>Bad Requestttt</p>")
 
     if 'otp_user_id' not in request.session.keys():
         return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
@@ -406,19 +407,50 @@ def otp(request):
     
     elif request.method == "POST":
         secret_key = request.session['otp_key']
+        print(secret_key)
         encoded_key = base64.b32encode(secret_key.encode())
         request.session.pop('otp_key')
         one_time_password = pyotp.TOTP(encoded_key, interval=300)
         user = User.objects.get(id=request.session['otp_user_id'])
         request.session.pop('otp_user_id')
+        print(one_time_password.now())
+        print(request.POST["otp"])
         if one_time_password.verify(request.POST["otp"]):
             #login(request, user)
-            return HttpResponse("<h1>Success</h1><p>OTP verified successfully. Admin will review your account and activate it soon. </p> <p> Click <a href='/home'>here</a> to go to home page.</p>")
+            return HttpResponse("<h1>Success</h1><p>OTP verified successfully. Admin will review your account and activate it soon. </p> <p> Click <a href='\home'>here</a> to go to home page.</p>")
         else:
             # delete the user and profile from the database
             user_profile = Profile.objects.get(user_id=user.id)
             user_profile.delete()
             user.delete()
-            return HttpResponse(f"<h1>Error</h1><p> OTP was wrong or has been expired </p><p><a href='{'/sign-up'}'>Try again</a></p>")
+            return HttpResponse(f"<h1>Error</h1><p> UR TRASH OTP was wrong or has been expired </p><p><a href='{'/sign-up'}'>Try again</a></p>")
     else:
         return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
+
+@login_required(login_url="/login")
+def profile_page(request):
+    if request.user.is_authenticated:
+        editable = False
+        try:
+            user = User.objects.get(id=request.user.id)
+            if request.method == 'POST':
+                #print(request.POST)
+                if request.POST.get('editable')=='True':
+                    editable = True
+                    return render(request, 'main/profile.html', {"user_details": user, "editable": editable})  
+                else:
+                    editable = False
+                    user.first_name = request.POST.get('first_name')
+                    user.last_name = request.POST.get('last_name')
+                    if request.user.profile.role != 'patient' and request.user.profile.role != 'healthcarepro':
+                        profile = Profile.objects.get(user_id=request.user.id)
+                        profile.contact = request.POST.get('contact')
+                        profile.description = request.POST.get('description')
+                        profile.save()
+                    user.save()
+                    return render(request, 'main/profile.html', {"user_details": user, "editable": editable})     
+        except:
+            return HttpResponse("Error! User does not exist.")
+        
+        return render(request, 'main/profile.html', {"user_details": user, "editable": editable})
+        

@@ -32,6 +32,10 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
+AUTHENTICATION_BACKENDS = [
+    #'django.contrib.auth.backends.ModelBackend', # This is the default that allows us to log in via username
+    'website.authentication.SettingsBackend'
+]
 
 # Application definition
 
@@ -93,7 +97,7 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '',
         'USER': 'root',
-        'PASSWORD': '_Ashmct94',
+        'PASSWORD': 'mysql',
     }
 }
 
