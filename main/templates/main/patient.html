@@ -40,7 +40,16 @@
             {% csrf_token %}
             <button type="submit" class="btn btn-primary" value="{{post.id}}" name="download-shared-user">Download</button>
         </form>
-        <p class="card-text"><small class="text-muted">Posted by {{post.author.username}} on {{post.created_at}}</small>
+        <br>
+        <!-- Show a tick mark if the document is digitally signed with the text "Signed" and show a cross mark if the document is not digitally signed with the text "Not Signed" -->
+        {% if post.is_signed %}
+        <i class="fas fa-check-circle" style="color: green;"></i>
+        <span style="color: green;">Digitally Signed</span>
+        {% else %}
+        <i class="fas fa-times-circle" style="color: red;"></i>
+        <span style="color: red;">Not Verified</span>
+        {% endif %}
+        <p class="card-text"><small class="text-muted">Posted by {{post.author_username}} on {{post.created_at}}</small>
         </p>
     </div>
 </div>

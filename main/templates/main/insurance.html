@@ -13,7 +13,12 @@
         <form method="post">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary" value="{{post.id}}" name="download-user">Download</button>
+            <!-- To delete the post -->
+            {% if post.author == user %}
+            <button type="submit" class="btn btn-danger" value="{{post.id}}" name="delete-user">Delete</button>
+            {% endif %}
         </form>
+        
         <p class="card-text">File Shared to: {{post.share_to_user.username}}</p>
         <p class="card-text"><small class="text-muted">Posted by {{post.author.username}} on {{post.created_at}}</small>
         </p>
@@ -33,6 +38,8 @@
         <form method="post">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary" value="{{post.id}}" name="download-shared-user">Download</button>
+            <!-- show button to share a file with the same user -->
+            <button type="submit" class="btn btn-primary" value="{{post.author_id}}" name="receiver">Share Confirmation Documents</button>
         </form>
         <br>
         <!-- Show a tick mark if the document is digitally signed with the text "Signed" and show a cross mark if the document is not digitally signed with the text "Not Signed" -->
@@ -43,7 +50,7 @@
         <i class="fas fa-times-circle" style="color: red;"></i>
         <span style="color: red;">Not Verified</span>
         {% endif %}
-        <p class="card-text"><small class="text-muted">Posted by {{post.author.username}} on {{post.created_at}}</small>
+        <p class="card-text"><small class="text-muted">Posted by {{post.author_username}} on {{post.created_at}}</small>
         </p>
     </div>
 </div>

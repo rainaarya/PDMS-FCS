@@ -104,7 +104,19 @@ def patient(request):
             else:
                 user_posts=Post.objects.filter(author=request.user)
                 shared_with_user_posts=Post.objects.filter(share_to_user=request.user)
-                return render(request, 'main/patient.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts})
+                shared_with_user_posts_list=[]
+
+                for post in shared_with_user_posts:
+                    #print all attributes of post as a dictionary
+                    post_data=vars(post)
+                    if signatures.verify_pdf(post.certificate_user.path, post.file.path):
+                        post_data['is_signed']=True
+                    else:
+                        post_data['is_signed']=False
+                    # add author_username to post_data
+                    post_data['author_username']=post.author.username
+                    shared_with_user_posts_list.append(post_data)
+                return render(request, 'main/patient.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
 
         else:
             return redirect("/home")
@@ -136,6 +148,21 @@ def insurance(request):
                         return FileResponse(post.file, as_attachment=True)
                     else:
                         return HttpResponse("Error! You do not have permission to download this document.")
+                elif request.POST.get('delete-user'):
+                    try:
+                        post_id = request.POST.get('delete-user')
+                        post = Post.objects.get(id=int(post_id))
+                    except:
+                        return HttpResponse("Error! Document does not exist.")
+                    if post.author == request.user:
+                        post.delete()
+                        return redirect("/insurance")
+                    else:
+                        return HttpResponse("Error! You do not have permission to delete this document.")
+                elif request.POST.get('receiver'):
+                    receiver = request.POST.get('receiver')
+                    #print(int(receiver))
+                    return redirect("/share/"+receiver)
 
                 # Code here to search for users and share documents with them
             else:
@@ -150,7 +177,11 @@ def insurance(request):
                         post_data['is_signed']=True
                     else:
                         post_data['is_signed']=False
+                    # add author_username to post_data
+                    post_data['author_username']=post.author.username
                     shared_with_user_posts_list.append(post_data)
+                
+                #print(shared_with_user_posts_list)
 
                 return render(request, 'main/insurance.html', {'user_posts':user_posts, 'shared_with_user_posts':shared_with_user_posts_list})
 
