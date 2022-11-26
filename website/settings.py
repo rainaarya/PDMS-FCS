@@ -29,6 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '192.168.3.41',
+    'localhost',
     '127.0.0.1'
 ]
 
@@ -97,7 +98,7 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '',
         'USER': 'root',
-        'PASSWORD': 'mysql',
+        'PASSWORD': '_Ashmct94',
     }
 }
 
