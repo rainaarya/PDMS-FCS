@@ -9,6 +9,7 @@ from django.contrib.auth.models import User, Group
 from .models import Post, Profile
 from django.http import FileResponse, HttpResponse
 from digital_signatures import blockchain_implementor, signatures
+from django.contrib.auth.hashers import make_password, check_password
 from django.core.files import File
 import os
 import pyotp
@@ -511,8 +512,8 @@ def share(request, receiver):
                 post.blockchain_index = blockchain_index
                 post.save()
                 return redirect("/home")
-            else:
-                return HttpResponse("Error! Invalid form data. Make sure size of file is less than 5MB and file type is pdf.")
+            # else:
+            #     return HttpResponse("Error! Invalid form data. Make sure size of file is less than 5MB and file type is pdf.")
                 
         else:
             form = PostForm()
@@ -528,10 +529,16 @@ def sign_up(request):
         profile_form = ProfileForm(request.POST, request.FILES)
 
         if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            user.refresh_from_db()
+            user = user_form.save(commit=False)
             user.is_active = False
+            #get username and password and hash it and store it in database
+            username = user_form.cleaned_data.get('username')
+            password = user_form.cleaned_data.get('password1')
+            hashed_pwd = make_password(password) # hash password
+            user.username = username
+            user.password = hashed_pwd
             user.save()
+            user.refresh_from_db()
             profile = profile_form.save(commit=False)
             if profile.user_id is None:
                 profile.user_id = user.id

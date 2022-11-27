@@ -58,6 +58,40 @@ class Profile(models.Model):
     location = models.CharField(max_length=200, null=True, blank=True)
     contact = models.CharField(max_length=200, null=True, blank=True)
     
+    def clean(self):
+        # method to check if the file is a pdf and not more than 5MB
+        if self.document1:
+            if not self.document1.name.endswith('.pdf'):
+                raise ValidationError('File is not PDF Format')
+            if self.document1.size > 5242880:
+                raise ValidationError('File is too large (> 5 MB)')
+        else:
+            raise ValidationError('File is missing')
+
+        if self.document2:
+            if not self.document2.name.endswith('.pdf'):
+                raise ValidationError('File is not PDF Format')
+            if self.document2.size > 5242880:
+                raise ValidationError('File is too large (> 5 MB)')
+        else:
+            raise ValidationError('File is missing')
+
+        if self.image1:
+            if not (self.image1.name.endswith('.jpg') or self.image1.name.endswith('.jpeg') or self.image1.name.endswith('.png')):
+                raise ValidationError('File is not Image Format (jpg/jpeg/png)')
+            if self.image1.size > 5242880:
+                raise ValidationError('File is too large (> 5 MB)')
+        else:
+            raise ValidationError('File is missing')
+
+        if self.image2:
+            if not (self.image2.name.endswith('.jpg') or self.image2.name.endswith('.jpeg') or self.image2.name.endswith('.png')):
+                raise ValidationError('File is not Image Format (jpg/jpeg/png)')
+            if self.image2.size > 5242880:
+                raise ValidationError('File is too large (> 5 MB)')
+        else:
+            raise ValidationError('File is missing')
+
     def delete(self, using=None, keep_parents=False):
         # to delete the physical file from the storage when the object is deleted
         #print("\n\ndeleting\n\n")
