@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from website import settings
 from datetime import datetime
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import FileResponse, HttpResponse
 from main.models import Profile
 import razorpay
@@ -22,93 +23,88 @@ import base64
 def make_secret_key(random_string):
     return str(datetime.date(datetime.now())) + random_string
 
+@login_required(login_url="/login")
 def Product_payment(request):
     
-    if request.method == 'GET':
-        form = ProductPaymentForm()
-        return render(request, 'abc/store.html')
+    if request.user.is_authenticated:
     
-    if request.method == "POST":
-        price = settings.product_price_dict[request.POST.get('id_of_product')]
-        quantity = int(request.POST.get('quantity'))
-        name = settings.product_name_dict[request.POST.get('id_of_product')]
-        amount = price*quantity*100
+        if request.method == 'GET':
+            form = ProductPaymentForm()
+            return render(request, 'abc/store.html')
+        
+        if request.method == "POST":
+            price = settings.product_price_dict[request.POST.get('id_of_product')]
+            quantity = int(request.POST.get('quantity'))
+            name = settings.product_name_dict[request.POST.get('id_of_product')]
+            amount = price*quantity*100
 
-        # create Razorpay client
-        client = razorpay.Client(auth=("rzp_test_FSmJq64QVMJZoT" , "2JB2coseLqjG7yWsniKIHs4Y"))
+            # create Razorpay client
+            client = razorpay.Client(auth=("rzp_test_FSmJq64QVMJZoT" , "2JB2coseLqjG7yWsniKIHs4Y"))
 
-        # create order
-        response_payment = client.order.create(dict(amount=amount,currency='INR'))
+            # create order
+            response_payment = client.order.create(dict(amount=amount,currency='INR'))
 
 
-        order_id = response_payment['id']
-        order_status = response_payment['status']
+            order_id = response_payment['id']
+            order_status = response_payment['status']
 
-        if order_status == 'created':
-            cold_Product = Product(
-                username=User.objects.get(id=request.user.id).username,
-                name=name,
-                amount=amount,
-                order_id=order_id
-            )
-            cold_Product.save()
-            response_payment['name'] = name
-            #response_payment['email'] = User.objects.get(id=request.user.id).email
+            if order_status == 'created':
+                cold_Product = Product(
+                    username=User.objects.get(id=request.user.id).username,
+                    name=name,
+                    amount=amount,
+                    order_id=order_id
+                )
+                cold_Product.save()
+                response_payment['name'] = name
+                user = request.user
+                x = datetime.now()
+                random = pyotp.random_base32()
+                hotpp = pyotp.HOTP(random)
+                one_time_password = hotpp.at(x.microsecond)
+                message = '\nThe 6 digit OTP is: ' + str(
+                one_time_password) + '\n\nThis is a system-generated response for your OTP. Please do not reply to this email.'
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = [user.email]
+                subject = 'Validating OTP'
+                send_mail(subject, message, email_from, recipient_list)
+                request.session["random"] = random
+                request.session["x_value"] = x.isoformat()
+                request.session['response_payment'] = response_payment
+                return redirect('/otp_payment')
+    else:
+        return redirect('/login')
 
-            # form = ProductPaymentForm(request.POST or None)
-            #print(User.objects.get(id=request.user.id).email)
-
-            # if(User.objects.get(id=request.user.id).username in user_product_dict.keys()):
-            #     user_product_dict[User.objects.get(id=request.user.id).username].append(cold_Product)
-            # else:
-            #     user_product_dict[User.objects.get(id=request.user.id).username] = []
-            #     user_product_dict[User.objects.get(id=request.user.id).username].append(cold_Product)
-
-          
-            user = request.user
-            print("\n")
-            print(user.is_authenticated,"\n")
-            request.session['otp_user_id'] = user.id
-            email = User.objects.get(id=request.user.id).email
-            secret_key = make_secret_key(''.join(random.choices(string.ascii_uppercase + string.digits, k=10))) + user.email
-            encoded_key = base64.b32encode(secret_key.encode())
-            one_time_password = pyotp.TOTP(encoded_key, interval=300)  
-            subject = 'Validating OTP'
-            message = '\nThe 6 digit OTP is: ' + str(
-                one_time_password .now()) + '\n\nThis is a system-generated response for your OTP. Please do not reply to this email.'
-            email_from = settings.EMAIL_HOST_USER
-            recipient_list = [email]
-            send_mail(subject, message, email_from, recipient_list)
-            request.session['otp_key'] = secret_key
-            request.session['response_payment'] = response_payment
-            return redirect('/otp_payment')
-            
-            return render(request, 'abc/Product_payment.html', {'payment': response_payment, 'email': request.user})
-            
-            # return render(request, 'abc/Product_payment.html', {'payment': response_payment})
 
 def otp_payment(request):
     if not(request.user.is_authenticated):
         return HttpResponse("<h1>Error</h1><p>Bad Requesttt</p>")
 
-    if 'otp_user_id' not in request.session.keys():
-        return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
+    # if 'otp_user_id' not in request.session.keys():
+    #     return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
 
     if request.method == "GET":
-        user = User.objects.get(id=request.session['otp_user_id'])
+        #user = User.objects.get(id=request.session['otp_user_id'])
+        user = request.user
         args = {"email": user.email}
         return render(request, "registration/otp.html", args)
     
     elif request.method == "POST":
-        secret_key = request.session['otp_key']
-        encoded_key = base64.b32encode(secret_key.encode())
-        request.session.pop('otp_key')
-        one_time_password = pyotp.TOTP(encoded_key, interval=300)
-        user = User.objects.get(id=request.session['otp_user_id'])
-        request.session.pop('otp_user_id')
+        user = request.user
+        #request.session.pop('otp_user_id') 
+        x_iso= request.session["x_value"]
+        x = datetime.fromisoformat(x_iso)
+        random = request.session["random"]
+        hotpp = pyotp.HOTP(random)
+        one_time_password = hotpp.at(x.microsecond)
+        request.session.pop("x_value")
+        request.session.pop("random")
+        post_datetime = datetime.now()
+        diff = post_datetime - x
+        sec = diff.total_seconds()
         response_payment = request.session['response_payment']
         request.session.pop('response_payment')
-        if one_time_password.verify(request.POST["otp"]):
+        if (request.POST['otp'] == one_time_password) and (sec < 120):
             #login(request, user)
             return render(request, 'abc/Product_payment.html', {'payment': response_payment})
         else:

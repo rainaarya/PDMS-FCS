@@ -548,25 +548,19 @@ def sign_up(request):
                     return HttpResponse("Error! Please fill in all the required fields during Sign Up based on your role.")
             profile.save()
             request.session['otp_user_id'] = user.id
-            email = user.email
-            secret_key = make_secret_key(''.join(random.choices(string.ascii_uppercase + string.digits, k=10))) + user.email
-            print(secret_key)
-            encoded_key = base64.b32encode(secret_key.encode())
-            one_time_password = pyotp.TOTP(encoded_key, interval=300)  
-            subject = 'Validating OTP'
+            x = datetime.now()
+            random = pyotp.random_base32()
+            hotpp = pyotp.HOTP(random)
+            one_time_password = hotpp.at(x.microsecond)
             message = '\nThe 6 digit OTP is: ' + str(
-                one_time_password .now()) + '\n\nThis is a system-generated response for your OTP. Please do not reply to this email.'
+            one_time_password) + '\n\nThis is a system-generated response for your OTP. Please do not reply to this email.'
             email_from = settings.EMAIL_HOST_USER
-            recipient_list = [email]
+            recipient_list = [user.email]
+            subject = 'Validating OTP'
             send_mail(subject, message, email_from, recipient_list)
-            request.session['otp_key'] = secret_key
-            return redirect("/otp")
-
-            # if (login(request, user)):
-            #     return redirect("/home")
-            # else:
-            #     return HttpResponse("Thank you for signing up. Your account is pending review by the admin and will be activated soon.")
-            
+            request.session["random"] = random
+            request.session["x_value"] = x.isoformat()
+            return redirect("/otp")      
         else:
             print(user_form.errors)
 
@@ -589,13 +583,19 @@ def otp(request):
         return render(request, "registration/otp.html", args)
     
     elif request.method == "POST":
-        secret_key = request.session['otp_key']
-        encoded_key = base64.b32encode(secret_key.encode())
-        request.session.pop('otp_key')
-        one_time_password = pyotp.TOTP(encoded_key, interval=300)
         user = User.objects.get(id=request.session['otp_user_id'])
-        request.session.pop('otp_user_id')
-        if one_time_password.verify(request.POST["otp"]):
+        request.session.pop('otp_user_id') 
+        x_iso= request.session["x_value"]
+        x = datetime.fromisoformat(x_iso)
+        random = request.session["random"]
+        hotpp = pyotp.HOTP(random)
+        one_time_password = hotpp.at(x.microsecond)
+        request.session.pop("x_value")
+        request.session.pop("random")
+        post_datetime = datetime.now()
+        diff = post_datetime - x
+        sec = diff.total_seconds()
+        if (request.POST['otp'] == one_time_password) and (sec < 120):
             #login(request, user)
             return HttpResponse("<h1>Success</h1><p>OTP verified successfully. Admin will review your account and activate it soon. </p> <p> Click <a href='\home'>here</a> to go to home page.</p>")
         else:
@@ -603,7 +603,7 @@ def otp(request):
             user_profile = Profile.objects.get(user_id=user.id)
             user_profile.delete()
             user.delete()
-            return HttpResponse(f"<h1>Error</h1><p> UR TRASH OTP was wrong or has been expired </p><p><a href='{'/sign-up'}'>Try again</a></p>")
+            return HttpResponse(f"<h1>Error</h1><p> The OTP was wrong or has been expired </p><p><a href='{'/sign-up'}'>Try again</a></p>")
     else:
         return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
 
