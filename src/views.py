@@ -167,10 +167,12 @@ def refund(request):
         product_order=Product.objects.get(order_id=details['id'])
         payment_id = product_order.razorpay_payment_id
 
+ 
+
         client.payment.refund(payment_id,{
         "amount": details['amount'],
         "speed": "optimum",
-        "receipt": "Receipt No. 31"
+        "receipt": "Reciept for order #"+details['id']
         })
 
         #update to paid = 0
