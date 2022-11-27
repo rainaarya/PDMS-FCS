@@ -10,3 +10,4 @@ user-certificates/
 user-documents
 venv/
 static/
+digital_signatures/nohup.out

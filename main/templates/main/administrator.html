@@ -3,8 +3,7 @@
 <h1 class="text-center">Administrator's Page</h1>
 <br>
 <h3>List of Organizations</h3>
-{% for user in users %}
-{% if user.profile.role != 'patient' and user.profile.role != 'healthcarepro' %}
+
 <table class="table">
   <thead>
     <tr>
@@ -23,10 +22,12 @@
 
     </tr>
   </thead>
+
   <form method="post">
     {% csrf_token %}
     <tbody>
-
+{% for user in users %}
+{% if user.profile.role != 'patient' and user.profile.role != 'healthcarepro' %}
       <tr>
         <td>{{user.username}}</td>
         <td>{{user.email}}</td>
@@ -35,9 +36,9 @@
         <td>{{user.profile.role}}</td>
         <td>{{user.profile.organisation_name}}</td>
         <td>{{user.profile.description}}</td>
-        <td><button type="submit" class="btn btn-info" name="image1" value="{{user.id}} width=" 100">Image1</button>
+        <td><button type="submit" class="btn btn-info" name="image1" value="{{user.id}}" width="100">Image1</button>
         </td>
-        <td><button type="submit" class="btn btn-info" name="image2" value="{{user.id}} width=" 100">Image2</button>
+        <td><button type="submit" class="btn btn-info" name="image2" value="{{user.id}}" width="100">Image2</button>
         </td>
         <td>{{user.profile.location}}</td>
         <td>{{user.profile.contact}}</td>
@@ -47,17 +48,16 @@
         <td><button type="submit" class="btn btn-success" name="approve" value="{{user.id}}">Approve</button></td>
         {% endif %}
       </tr>
-
-    </tbody>
-  </form>
-</table>
 {% endif %}
 {% endfor %}
+    </tbody>
+  </form>
+
+</table>
+
 
 <br><br>
 <h3>List of Individual Users</h3>
-{% for user in users %}
-{% if user.profile.role == 'patient' or user.profile.role == 'healthcarepro' %}
 <table class="table">
   <thead>
     <tr>
@@ -69,10 +69,12 @@
       <th scope="col">Approval</th>
     </tr>
   </thead>
+
   <form method="post">
     {% csrf_token %}
     <tbody>
-
+  {% for user in users %}
+  {% if user.profile.role == 'patient' or user.profile.role == 'healthcarepro' %}
       <tr>
         <td>{{user.username}}</td>
         <td>{{user.email}}</td>
@@ -85,11 +87,11 @@
         <td><button type="submit" class="btn btn-success" name="approve" value="{{user.id}}">Approve</button></td>
         {% endif %}
       </tr>
-
+  {% endif %}
+  {% endfor %}
     </tbody>
   </form>
 </table>
-{% endif %}
-{% endfor %}
+
 
 {% endblock %}
