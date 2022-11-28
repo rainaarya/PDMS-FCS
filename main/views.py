@@ -155,6 +155,19 @@ def patient(request):
                                 return HttpResponse("Error! You do not have permission to claim.")
                     except:
                         return HttpResponse("Error! You did not get any verification from insurance.")
+                elif request.POST.get('store-store'):
+                    try:
+                        if Post.objects.get(id=int(request.POST.get('store-store'))):
+                            post = Post.objects.get(id=int(request.POST.get('store-store')))
+                            if post.author.profile.role == 'pharmacy' and post.share_to_user == request.user:
+                                request.session['post_id'] = post.id
+                                print("JAA RAHA HUNNNNNNN")
+                                return redirect("/payment")
+                            else:
+                                return HttpResponse("Error! You do not have permission to claim.")
+                    except:
+                        return HttpResponse("Error! You did not get any verification from pharmacy.")
+                
                 
                 #if post request contains receiver
                 elif request.POST.get('receiver'):

@@ -29,12 +29,19 @@ def make_secret_key(random_string):
 def Product_payment(request):
     
     if request.user.is_authenticated:
-    
-        if request.method == 'GET':
-            form = ProductPaymentForm()
-            return render(request, 'abc/store.html')
+
+        if request.method == "GET":
+            if 'post_id' in request.session.keys():
+                post=Post.objects.get(id=request.session['post_id'])
+                request.session.pop('post_id')
+                if post.author.profile.role == 'pharmacy' and post.share_to_user == request.user:       
+                    return render(request, 'abc/store.html')
+                else:
+                    return redirect('/home')
+            else:
+                return redirect('/home')
         
-        if request.method == "POST":
+        elif request.method == "POST":
             price = settings.product_price_dict[request.POST.get('id_of_product')]
             quantity = int(request.POST.get('quantity'))
             name = settings.product_name_dict[request.POST.get('id_of_product')]

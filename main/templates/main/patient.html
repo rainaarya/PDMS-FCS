@@ -45,8 +45,7 @@
             {% endif %}
 
             {% if post.role == 'pharmacy' %}
-
-            <a class="btn btn-primary" href="/payment" role="button">Store</a>             
+            <button type="submit" class="btn btn-primary" name="store-store" value="{{post.id}}">Go to Store</button>           
             {% endif %}
         </form>
         <br>
