@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9npc35e5)-3nog*zd4l((=f%hrd2sjgzv#x5=3tr=k-(^_tm*+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     '192.168.3.41',
@@ -98,7 +98,7 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '',
         'USER': 'root',
-        'PASSWORD': 'mysql',
+        'PASSWORD': '_Ashmct94',
     }
 }
 
@@ -171,7 +171,7 @@ CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-#SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = True
 X_FRAME_OPTIONS = 'DENY'
 #SECURE_HSTS_SECONDS = 300  # set low, but when site is ready for deployment, set to at least 15768000 (6 months)
 #SECURE_HSTS_INCLUDE_SUBDOMAINS = True
