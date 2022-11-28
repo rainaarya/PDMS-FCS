@@ -144,6 +144,17 @@ def patient(request):
                         return HttpResponse(" Error! Store access does not exist.")
                     if post.author == request.user:
                         return redirect("/refund")
+                elif request.POST.get('refund'):
+                    try:
+                        if Post.objects.get(id=int(request.POST.get('refund'))):
+                            post = Post.objects.get(id=int(request.POST.get('refund')))
+                            if post.author.profile.role == 'insurance' and post.share_to_user == request.user:
+                                request.session['post_id'] = post.id
+                                return redirect("/refund")
+                            else:
+                                return HttpResponse("Error! You do not have permission to claim.")
+                    except:
+                        return HttpResponse("Error! You did not get any verification from insurance.")
                 
                 #if post request contains receiver
                 elif request.POST.get('receiver'):

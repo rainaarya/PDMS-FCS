@@ -40,11 +40,11 @@
             {% csrf_token %}
             <button type="submit" class="btn btn-primary" value="{{post.id}}" name="download-shared-user">Download</button>
             {% if post.role == 'insurance' %}
-            <a class="btn btn-primary" href="/refund" role="button">Claim</a>
+            <button type="submit" class="btn btn-primary" name="refund" value="{{post.id}}">Claim</button>
+            <!--<input type="hidden" name="refund" value="{{post.id}}">-->
             {% endif %}
 
             {% if post.role == 'pharmacy' %}
-            {% comment %} add button for payment {% endcomment %}
 
             <a class="btn btn-primary" href="/payment" role="button">Store</a>             
             {% endif %}

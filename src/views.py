@@ -6,6 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from website import settings
 from django.db.models import Q
+from main.models import Post, Profile
+
 #user_product_dict = dict()
 from django.core.mail import send_mail
 from website import settings
@@ -75,7 +77,7 @@ def Product_payment(request):
     else:
         return redirect('/login')
 
-
+@login_required(login_url="/login")
 def otp_payment(request):
     if not(request.user.is_authenticated):
         return HttpResponse("<h1>Error</h1><p>Bad Requesttt</p>")
@@ -117,91 +119,146 @@ def otp_payment(request):
         return HttpResponse("<h1>Error</h1><p>Bad Request</p>")
 
 @csrf_exempt
+@login_required(login_url="/login")
 def payment_status(request):
-    response = request.POST
-    params_dict = {
-        'razorpay_order_id': response['razorpay_order_id'],
-        'razorpay_payment_id': response['razorpay_payment_id'],
-        'razorpay_signature': response['razorpay_signature']
-    }
-    # prod=Product.objects.get(order_id=params_dict['razorpay_order_id'])
-    # prod.razorpay_payment_id=params_dict['razorpay_payment_id']
-    # prod.paid=True
-    # prod.save()
-    #print(f"Payment id is {response['razorpay_payment_id']}")
+    if request.user.is_authenticated:
+        response = request.POST
+        params_dict = {
+            'razorpay_order_id': response['razorpay_order_id'],
+            'razorpay_payment_id': response['razorpay_payment_id'],
+            'razorpay_signature': response['razorpay_signature']
+        }
+        # prod=Product.objects.get(order_id=params_dict['razorpay_order_id'])
+        # prod.razorpay_payment_id=params_dict['razorpay_payment_id']
+        # prod.paid=True
+        # prod.save()
+        #print(f"Payment id is {response['razorpay_payment_id']}")
 
 
-    # client instance
-    client = razorpay.Client(auth=("rzp_test_FSmJq64QVMJZoT" , "2JB2coseLqjG7yWsniKIHs4Y"))
-
-    try:
-        status = client.utility.verify_payment_signature(params_dict)
-        cold_Product = Product.objects.get(order_id=response['razorpay_order_id'])
-        cold_Product.razorpay_payment_id = response['razorpay_payment_id']
-        cold_Product.paid = True
-        cold_Product.save()
-        return render(request, 'abc/payment_status.html', {'status': True})
-    except:
-        return render(request, 'abc/payment_status.html', {'status': False})
-
-
-def refund(request):
-    if request.method == "POST":
-
-        # get product from database
-        prod = Product.objects.get(order_id=request.POST.get('prod'))
-        
-        print(prod.order_id)
-
-
-        # for i in range(len(user_product_dict[User.objects.get(id=request.user.id).username])):
-        #     if(user_product_dict[User.objects.get(id=request.user.id).username][i].order_id == request.POST.get('prod')):
-        #         product = user_product_dict[User.objects.get(id=request.user.id).username][i]
-
-        #print(product.order_id)
-        # get payment_id from order_id razorpay
+        # client instance
         client = razorpay.Client(auth=("rzp_test_FSmJq64QVMJZoT" , "2JB2coseLqjG7yWsniKIHs4Y"))
-        details = client.order.fetch(prod.order_id)
-        #details = client.order.fetch(product.order_id)
-        # print(details)
-        product_order=Product.objects.get(order_id=details['id'])
-        payment_id = product_order.razorpay_payment_id
 
- 
-
-        client.payment.refund(payment_id,{
-        "amount": details['amount'],
-        "speed": "optimum",
-        "receipt": "Reciept for order #"+details['id']
-        })
-
-        #update to paid = 0
-        product_order.paid = False
-        product_order.save()
-
-        return render(request, 'abc/refund_redirect.html', {'prod': product_order.name})
-
+        try:
+            status = client.utility.verify_payment_signature(params_dict)
+            cold_Product = Product.objects.get(order_id=response['razorpay_order_id'])
+            cold_Product.razorpay_payment_id = response['razorpay_payment_id']
+            cold_Product.paid = True
+            cold_Product.save()
+            return render(request, 'abc/payment_status.html', {'status': True})
+        except:
+            return render(request, 'abc/payment_status.html', {'status': False})
     else:
-        path = ""
-        # if(User.objects.get(id=request.user.id).username in user_product_dict.keys()):
-        #     path = 'abc/refund.html'
-        # else:
-        #     path = 'abc/refund_no_prod.html'
+        return redirect('/login')
 
-        #Product.objects.filter(lastname__icontains='User.objects.get(id=request.user.id).username').values()
+pos_id = 1
 
-        if(Product.objects.filter(username=User.objects.get(id=request.user.id).username, paid = True)!=None):
-            path = 'abc/refund.html' 
-            # find all products of user
-            products = Product.objects.filter(username=User.objects.get(id=request.user.id).username, paid = True)
-            #create a list containing names of all products
-          
+@login_required(login_url="/login")
+def refund(request):
+    if request.user.is_authenticated:
+        #check if post_id is present in session
+        if request.method == "GET":
+            if 'post_id' in request.session.keys():
+                post=Post.objects.get(id=request.session['post_id'])
+                request.session.pop('post_id')
+                if post.author.profile.role == 'insurance' and post.share_to_user == request.user:
+
+                    # if request.method == "POST":
+
+                    #     # get product from database
+                    #     prod = Product.objects.get(order_id=request.POST.get('prod'))
+                        
+                    
+
+
+                    #     # for i in range(len(user_product_dict[User.objects.get(id=request.user.id).username])):
+                    #     #     if(user_product_dict[User.objects.get(id=request.user.id).username][i].order_id == request.POST.get('prod')):
+                    #     #         product = user_product_dict[User.objects.get(id=request.user.id).username][i]
+
+                    #     #print(product.order_id)
+                    #     # get payment_id from order_id razorpay
+                    #     client = razorpay.Client(auth=("rzp_test_FSmJq64QVMJZoT" , "2JB2coseLqjG7yWsniKIHs4Y"))
+                    #     details = client.order.fetch(prod.order_id)
+                    #     #details = client.order.fetch(product.order_id)
+                    #     # print(details)
+                    #     product_order=Product.objects.get(order_id=details['id'])
+                    #     payment_id = product_order.razorpay_payment_id
+
                 
 
+                    #     client.payment.refund(payment_id,{
+                    #     "amount": details['amount'],
+                    #     "speed": "optimum",
+                    #     "receipt": "Reciept for order #"+details['id']
+                    #     })
+
+                    #     #update to paid = 0
+                    #     product_order.paid = False
+                    #     product_order.save()
+
+                    #     return render(request, 'abc/refund_redirect.html', {'prod': product_order.name})
+
+                    
+                    path = ""
+                    # if(User.objects.get(id=request.user.id).username in user_product_dict.keys()):
+                    #     path = 'abc/refund.html'
+                    # else:
+                    #     path = 'abc/refund_no_prod.html'
+
+                    #Product.objects.filter(lastname__icontains='User.objects.get(id=request.user.id).username').values()
+
+                    if(Product.objects.filter(username=User.objects.get(id=request.user.id).username, paid = True)!=None):
+                        path = 'abc/refund.html' 
+                        # find all products of user
+                        products = Product.objects.filter(username=User.objects.get(id=request.user.id).username, paid = True)
+                        #create a list containing names of all products
+                    
+                            
+
+                        
+                        return render(request, path, {'products': products})
+                    else:
+                        path = 'abc/refund_no_prod.html'
+                        return render(request, path, {'products': []})
+                else:
+                    return redirect('/home')
+            else:
+                return redirect('/home')
+        elif request.method == "POST":
+
+                    # get product from database
+                    prod = Product.objects.get(order_id=request.POST.get('prod'))
+                    
+                
+
+
+                    # for i in range(len(user_product_dict[User.objects.get(id=request.user.id).username])):
+                    #     if(user_product_dict[User.objects.get(id=request.user.id).username][i].order_id == request.POST.get('prod')):
+                    #         product = user_product_dict[User.objects.get(id=request.user.id).username][i]
+
+                    #print(product.order_id)
+                    # get payment_id from order_id razorpay
+                    client = razorpay.Client(auth=("rzp_test_FSmJq64QVMJZoT" , "2JB2coseLqjG7yWsniKIHs4Y"))
+                    details = client.order.fetch(prod.order_id)
+                    #details = client.order.fetch(product.order_id)
+                    # print(details)
+                    product_order=Product.objects.get(order_id=details['id'])
+                    payment_id = product_order.razorpay_payment_id
+
             
-            return render(request, path, {'products': products})
-        else:
-            path = 'abc/refund_no_prod.html'
-            return render(request, path, {'products': []})
+
+                    client.payment.refund(payment_id,{
+                    "amount": details['amount'],
+                    "speed": "optimum",
+                    "receipt": "Reciept for order #"+details['id']
+                    })
+
+                    #update to paid = 0
+                    product_order.paid = False
+                    product_order.save()
+
+                    return render(request, 'abc/refund_redirect.html', {'prod': product_order.name})
+
+    else:
+        return redirect('/login')
 
 
