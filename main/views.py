@@ -153,19 +153,21 @@ def patient(request):
                 else:
                     type=request.POST.get('type')
                     search=request.POST.get('search')
+                    location=request.POST.get('location')
 
                     if type == 'healthcarepro':
                         # search for healthcarepro and name as user first name and last name
                         results = Profile.objects.filter(role='healthcarepro', user__first_name__icontains=search) | Profile.objects.filter(role='healthcarepro', user__last_name__icontains=search)
                         return render(request, 'main/patient.html', {'results':results})
                     elif type == 'hospital':
-                        results = Profile.objects.filter(role='hospital', organisation_name__icontains=search)
+                        # search for hospital and name as user first name and last name and location
+                        results = Profile.objects.filter(role='hospital', organisation_name__icontains=search , location__icontains=location)
                         return render(request, 'main/patient.html', {'results': results})
                     elif type == 'pharmacy':
-                        results = Profile.objects.filter(role='pharmacy', organisation_name__icontains=search)
+                        results = Profile.objects.filter(role='pharmacy', organisation_name__icontains=search , location__icontains=location)
                         return render(request, 'main/patient.html', {'results': results})
                     elif type == 'insurance':
-                        results = Profile.objects.filter(role='insurance', organisation_name__icontains=search)
+                        results = Profile.objects.filter(role='insurance', organisation_name__icontains=search , location__icontains=location)
                         return render(request, 'main/patient.html', {'results': results})
                     else:
                         return redirect("/patient")
