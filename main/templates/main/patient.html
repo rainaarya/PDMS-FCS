@@ -39,8 +39,13 @@
         <form method="post">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary" value="{{post.id}}" name="download-shared-user">Download</button>
+            {% if post.role == 'insurance' %}
+            <a class="btn btn-primary" href="/refund" role="button">Claim</a>
+            {% endif %}
+
             {% if post.role == 'pharmacy' %}
             {% comment %} add button for payment {% endcomment %}
+
             <a class="btn btn-primary" href="/payment" role="button">Store</a>             
             {% endif %}
         </form>
@@ -94,7 +99,7 @@
         </div>
         <br>
         <button type="submit" class="btn btn-primary">Submit</button>
-        <a class="btn btn-primary" href="/refund" role="button">Refund</a>
+        
         <br> <br>
     </form>
 </div>
