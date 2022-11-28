@@ -161,10 +161,10 @@ def patient(request):
                             post = Post.objects.get(id=int(request.POST.get('store-store')))
                             if post.author.profile.role == 'pharmacy' and post.share_to_user == request.user:
                                 request.session['post_id'] = post.id
-                                print("JAA RAHA HUNNNNNNN")
+                                #print("JAA RAHA HUNNNNNNN")
                                 return redirect("/payment")
                             else:
-                                return HttpResponse("Error! You do not have permission to claim.")
+                                return HttpResponse("Error! You do not have permission to buy medicines.")
                     except:
                         return HttpResponse("Error! You did not get any verification from pharmacy.")
                 
