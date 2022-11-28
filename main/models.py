@@ -81,16 +81,12 @@ class Profile(models.Model):
                 raise ValidationError('File is not Image Format (jpg/jpeg/png)')
             if self.image1.size > 5242880:
                 raise ValidationError('File is too large (> 5 MB)')
-        else:
-            raise ValidationError('File is missing')
 
         if self.image2:
             if not (self.image2.name.endswith('.jpg') or self.image2.name.endswith('.jpeg') or self.image2.name.endswith('.png')):
                 raise ValidationError('File is not Image Format (jpg/jpeg/png)')
             if self.image2.size > 5242880:
                 raise ValidationError('File is too large (> 5 MB)')
-        else:
-            raise ValidationError('File is missing')
 
     def delete(self, using=None, keep_parents=False):
         # to delete the physical file from the storage when the object is deleted
