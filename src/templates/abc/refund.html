@@ -22,7 +22,7 @@
     <form method="POST">
         {% csrf_token %}
         <div class="form-group">
-            <label for="exampleFormControlSelect1">Example select</label>
+            <label for="exampleFormControlSelect1">Products to Claim</label>
             <select class="form-control" id= "prod" name = "prod">
                 {% for prod in products %}
                 <option value="{{prod.order_id}}" SELECTED>{{prod.name}}</option>
@@ -30,7 +30,7 @@
             </select>
           </div>
         <div class="btn-group">
-            <button type="submit" class="btn btn-sm btn-outline-secondary">Buy</button>
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Initiate</button>
             
           </div>
     </form>

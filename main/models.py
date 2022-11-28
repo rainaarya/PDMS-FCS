@@ -52,11 +52,11 @@ class Profile(models.Model):
     document1=models.FileField(upload_to='documents/', null=True, blank=True)
     document2=models.FileField(upload_to='documents/', null=True, blank=True)
     organisation_name = models.CharField(max_length=200, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True,max_length=500)
     image1 = models.ImageField(upload_to='images/', null=True, blank=True)
     image2 = models.ImageField(upload_to='images/', null=True, blank=True)
     location = models.CharField(max_length=200, null=True, blank=True)
-    contact = models.CharField(max_length=200, null=True, blank=True)
+    contact = models.CharField(null=True, blank=True, max_length=10)
     
     def clean(self):
         # method to check if the file is a pdf and not more than 5MB
@@ -87,6 +87,12 @@ class Profile(models.Model):
                 raise ValidationError('File is not Image Format (jpg/jpeg/png)')
             if self.image2.size > 5242880:
                 raise ValidationError('File is too large (> 5 MB)')
+        if self.contact:
+            if not self.contact.isdigit():
+                raise ValidationError('Contact number is not valid. Enter only digits')
+            elif self.contact.isdigit() and len(self.contact) != 10:
+                raise ValidationError('Contact number is not 10 digits')
+        
 
     def delete(self, using=None, keep_parents=False):
         # to delete the physical file from the storage when the object is deleted

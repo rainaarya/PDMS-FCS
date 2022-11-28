@@ -179,7 +179,7 @@ def refund(request):
         product_order.paid = False
         product_order.save()
 
-        return render(request, 'abc/refund_redirect.html', {'prod': details['id']})
+        return render(request, 'abc/refund_redirect.html', {'prod': product_order.name})
 
     else:
         path = ""
