@@ -531,7 +531,14 @@ def share(request, receiver):
                 certificate_path, private_key_path = signatures.load(post.author.username)
                 post.certificate_user = File(open(certificate_path, 'rb'))
                 post.save()
-                signatures.sign_pdf(post.file.path, certificate_path, private_key_path)
+                try:
+                    signatures.sign_pdf(post.file.path, certificate_path, private_key_path)
+                except:
+                    try:
+                        os.remove(private_key_path)
+                    except:
+                        pass
+                    pass
                 # remove certificate of certificate_path
                 os.remove(certificate_path)
                 hash, blockchain_index = blockchain_implementor.add_to_chain(post.file.path)

@@ -1,2 +1,8 @@
+{% extends 'main/base.html' %} {% block title %}Claim Done{% endblock %}
+{% load crispy_forms_tags %} {% block content %}
 <h1>Refund Initiated for {{prod}}</h1>
-<a href="/home"> Click here to go back to home page</a>
+<br><br>
+<p>
+Click <a href="/home">here </a> to go back to home page</a>
+</p>
+{% endblock %}
